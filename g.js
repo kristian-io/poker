@@ -123,19 +123,27 @@ class Deck {
       "Ad",
       "Ah",
       "As",
-      "Ac",
+      "Ac"
     ]
 
     for (let i = this.cards.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+      [
+        this.cards[i], this.cards[j]
+      ] = [
+        this.cards[j], this.cards[i]
+      ];
     }
   }
 
   shuffle() {
     for (let i = this.cards.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+      [
+        this.cards[i], this.cards[j]
+      ] = [
+        this.cards[j], this.cards[i]
+      ];
     }
   }
 
@@ -150,9 +158,22 @@ class Deck {
   }
 }
 
-
-function hasPair(hand, communitycards) {
-  rankTable = ["A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2"]
+function hasThreeOfaKind(hand, communitycards) {
+  rankTable = [
+    "A",
+    "K",
+    "Q",
+    "J",
+    "T",
+    "9",
+    "8",
+    "7",
+    "6",
+    "5",
+    "4",
+    "3",
+    "2"
+  ]
 
   //get all card ranks:
   let cards = hand.concat(communitycards)
@@ -160,7 +181,87 @@ function hasPair(hand, communitycards) {
   // console.log('unsorted');
   // console.log(cards);
   // for (card in cards) {
-  //   cardsRank.push(cards[card][0]) //get all the card Ranks (strip the suits)
+  //   cardsRank.push(cards[card][0]) get all the card Ranks (strip the suits)
+  // }
+  cards.sort(function sort(a, b) {
+    if (rankTable.indexOf(a[0]) < rankTable.indexOf(b[0])) {
+      return -1
+    }
+    if (rankTable.indexOf(a[0]) > rankTable.indexOf(b[0])) {
+      return 1
+    }
+    if (rankTable.indexOf(a[0]) == rankTable.indexOf(b[0])) {
+      return 0
+    }
+  })
+
+  // console.log('sorted');
+  // console.log(cards);
+  let threeOfaKind = []
+  for (var i = 0; i < cards.length; i++) {
+    if (i + 1 == cards.length) { //in the next if(){} we are checking if the NEXT element is the same, we have to break if we are on the last element
+      // console.log('fuck');
+      break;
+    }
+    else if (i + 2 == cards.length) { //in the next if(){} we are checking if the NEXT+1 element is the same, we have to break if we are on the last element
+      // console.log('fuck');
+      break;
+    }
+
+    if (cards[i + 1][0] == cards[i][0] & cards[i + 2][0] == cards[i][0]) {
+      // console.log('found match' + cards[i][0]);
+      threeOfaKind.push([
+        cards[i],
+        cards[i + 1],
+        cards[i + 2]
+      ])
+    }
+  }
+  // console.log(pairs);
+
+  if (!Array.isArray(threeOfaKind) || threeOfaKind.length != 1) {
+    return false
+  } else {
+    restOftheHand = []
+    for (var i = 0; i < cards.length; i++) {
+
+      if (threeOfaKind[0][0] == cards[i] || threeOfaKind[0][1] == cards[i] || threeOfaKind[0][2] == cards[i]) {
+        // restOftheHand.push(cards[i])
+      }
+      else {
+        restOftheHand.push(cards[i])
+      }
+    }
+
+
+    return [threeOfaKind[0], restOftheHand[0], restOftheHand[1]]
+  }
+}
+
+function hasTwoPairs(hand, communitycards) {
+  rankTable = [
+    "A",
+    "K",
+    "Q",
+    "J",
+    "T",
+    "9",
+    "8",
+    "7",
+    "6",
+    "5",
+    "4",
+    "3",
+    "2"
+  ]
+
+  //get all card ranks:
+  let cards = hand.concat(communitycards)
+  let cardsRank = []
+  // console.log('unsorted');
+  // console.log(cards);
+  // for (card in cards) {
+  //   cardsRank.push(cards[card][0]) get all the card Ranks (strip the suits)
   // }
   cards.sort(function sort(a, b) {
     if (rankTable.indexOf(a[0]) < rankTable.indexOf(b[0])) {
@@ -184,13 +285,106 @@ function hasPair(hand, communitycards) {
     }
     if (cards[i + 1][0] == cards[i][0]) {
       // console.log('found match' + cards[i][0]);
-      pairs.push([cards[i],cards[i+1]]) // this not only gives us pairs but also a 3of a kind and 4 of a kind
+      pairs.push([
+        cards[i],
+        cards[i + 1]
+      ])
+    }
+  }
+  // console.log(pairs);
+
+  if (!Array.isArray(pairs) || pairs.length != 2) {
+    return false
+  } else {
+    restOftheHand = []
+    for (var i = 0; i < cards.length; i++) {
+
+      // console.log('===================================================');
+      // console.log("cards[i] " + cards[i]);
+      // console.log('pairs[0][0] ' + pairs[0][0] );
+      // console.log('pairs[0][1] ' + pairs[0][1] );
+      // console.log('pairs[0][0] ' + pairs[1][0] );
+      // console.log('pairs[0][1] ' + pairs[1][1] );
+      // console.log('pairs[0][0] != cards[i] ' + (pairs[0][0] != cards[i]) );
+      // console.log('pairs[0][1] != cards[i] ' + (pairs[0][1] != cards[i]) );
+      // console.log('pairs[1][0] != cards[i] ' + (pairs[1][0] != cards[i]) );
+      // console.log('pairs[1][1] != cards[i] ' + (pairs[1][1] != cards[i]) );
+      if (pairs[0][0] == cards[i] || pairs[0][1] == cards[i] || pairs[1][0] == cards[i] || pairs[1][1] == cards[i]) {
+        // restOftheHand.push(cards[i])
+      }
+      else {
+        restOftheHand.push(cards[i])
+      }
+      // if (pairs[1][0] != cards[i] || pairs[1][1] != cards[i]) {
+      //   restOftheHand.push(cards[i])
+      // }
+
+    }
+    // console.log(restOftheHand);
+    // console.log(restOftheHand.splice(0,3));
+    // return [pair, restOftheHand]
+    return [pairs[0], pairs[1], restOftheHand[0]]
+  }
+
+}
+
+function hasPair(hand, communitycards) {
+  rankTable = [
+    "A",
+    "K",
+    "Q",
+    "J",
+    "T",
+    "9",
+    "8",
+    "7",
+    "6",
+    "5",
+    "4",
+    "3",
+    "2"
+  ]
+
+  //get all card ranks:
+  let cards = hand.concat(communitycards)
+  let cardsRank = []
+  // console.log('unsorted');
+  // console.log(cards);
+  // for (card in cards) {
+  //   cardsRank.push(cards[card][0]) get all the card Ranks (strip the suits)
+  // }
+  cards.sort(function sort(a, b) {
+    if (rankTable.indexOf(a[0]) < rankTable.indexOf(b[0])) {
+      return -1
+    }
+    if (rankTable.indexOf(a[0]) > rankTable.indexOf(b[0])) {
+      return 1
+    }
+    if (rankTable.indexOf(a[0]) == rankTable.indexOf(b[0])) {
+      return 0
+    }
+  })
+
+  // console.log('sorted');
+  // console.log(cards);
+  let pairs = []
+  for (var i = 0; i < cards.length; i++) {
+    if (i + 1 == cards.length) { //in the next if(){} we are checking if the NEXT element is the same, we have to break if we are on the last element
+      // console.log('fuck');
+      break;
+    }
+    if (cards[i + 1][0] == cards[i][0]) {
+      // console.log('found match' + cards[i][0]);
+      pairs.push([
+        cards[i],
+        cards[i + 1]
+      ])
     }
   }
 
   // console.log(pairs);
 
-  if (!Array.isArray(pairs) || pairs.length != 1 ) {
+  if (!Array.isArray(pairs) || pairs.length != 1) {
     return false
   } else {
     restOftheHand = []
@@ -201,14 +395,22 @@ function hasPair(hand, communitycards) {
       }
     }
     // console.log(restOftheHand.splice(0,3));
-      // return [pair, restOftheHand]
-    return [pairs[0], restOftheHand.splice(0,3)]
+    // return [pair, restOftheHand]
+    return [
+      pairs[0], restOftheHand[0], restOftheHand[1], restOftheHand[2]]
   }
 }
 
-// console.log(hasPair(["Qc", "Jh"], ["Jc", "9d", "9h", "Js", "2s"]));
 
 
+console.log(hasPair(["Qc", "Ah"], ["Jc", "8d", "9h", "2c", "2s"]));
+// console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
+// console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
+
+console.log(hasTwoPairs(["Qc", "Jh"], ["Jc", "9d", "9h", "7s", "2s"]));
+// console.log(hasTwoPairs(["Qc", "9d"], ["9h", "Jh", "Jc", "7s", "2s"]));
+
+console.log(hasThreeOfaKind(["5c", "Jh"], ["4s", "2d", "Kh", "Kd", "Ks"]));
 
 function setup() {
   g = new Game();
@@ -220,14 +422,8 @@ function setup() {
   g.table.dealRiver();
 }
 
-
-
 // setup()
 // console.log(hasPair(g.table.seats[0].hand, g.table.communitycards));
-
-
-
-
 
 // function setup() {
 //   g = new Game ();
@@ -238,9 +434,6 @@ function setup() {
 //   g.table.dealTurn();
 //   g.table.dealRiver();
 // }
-
-
-
 
 // var deck = new Deck();
 // deck.shuffle()
@@ -259,7 +452,6 @@ function setup() {
 // deck.deal(1);
 // console.log(deck.cards);
 
-
-module.exports =  {
-  hasPair,
+module.exports = {
+  hasPair
 };

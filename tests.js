@@ -14,6 +14,7 @@ const cardTypes = {
 }
 
 
+// returns array of hand and community cards [hand,communitycards]
 function prepare(cardType) {
   var temp = cardType
   var tempH = temp.splice(0,2)
@@ -23,8 +24,15 @@ function prepare(cardType) {
 for (var type in cardTypes) {
   if (cardTypes.hasOwnProperty(type)) {
     prep = prepare(cardTypes[type])
+    // TODO: here I check all the types
     console.log(type + "              " + g.hasPair(prep[0], prep[1]));
-    // console.log(g.hasPair(prep[0], prep[1]));
+    // console.log(type + "              " + g.hasTwoPairs(prep[0], prep[1]));
+    // console.log(type + "              " + g.hasTreeOfaKind(prep[0], prep[1]));
+    // .
+    // .
+    // .
+
+// console.log(g.hasPair(prep[0], prep[1]));
   }
 }
 
