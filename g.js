@@ -158,6 +158,106 @@ class Deck {
   }
 }
 
+function hasStraight(hand, communitycards) {
+  // for straights we have 2 rank tables - A is highest and A is lowest
+  rankTable1 = [
+    "A",
+    "K",
+    "Q",
+    "J",
+    "T",
+    "9",
+    "8",
+    "7",
+    "6",
+    "5",
+    "4",
+    "3",
+    "2"
+  ]
+  rankTable2 = [
+    "K",
+    "Q",
+    "J",
+    "T",
+    "9",
+    "8",
+    "7",
+    "6",
+    "5",
+    "4",
+    "3",
+    "2",
+    "A"
+  ]
+
+  function straight(rankTable) {
+    // console.log();
+    let cards = hand.concat(communitycards)
+    cards.sort(function sort(a, b) {
+      if (rankTable.indexOf(a[0]) < rankTable.indexOf(b[0])) {
+        return -1
+      }
+      if (rankTable.indexOf(a[0]) > rankTable.indexOf(b[0])) {
+        return 1
+      }
+      if (rankTable.indexOf(a[0]) == rankTable.indexOf(b[0])) {
+        return 0
+      }
+    })
+
+    function rank(card, rankTable) {
+      return rankTable.indexOf(card[0])
+    }
+
+      // console.log('sorted');
+      // console.log(cards);
+
+
+    let straight = []
+    for (var i = 0; i < 3; i++) {
+      if (rank(cards[i],rankTable) + 1 == rank(cards[i + 1],rankTable)
+          &&
+          rank(cards[i + 1],rankTable) + 1 == rank(cards[i + 2],rankTable)
+          &&
+          rank(cards[i + 2],rankTable) + 1 == rank(cards[i + 3],rankTable)
+          &&
+          rank(cards[i + 3],rankTable) + 1 == rank(cards[i + 4],rankTable)
+        ) {
+        // console.log('found straigt');
+        straight.push([
+          cards[i],
+          cards[i + 1],
+          cards[i + 2],
+          cards[i + 3],
+          cards[i + 4]
+        ])
+      }
+    }
+
+    if (!Array.isArray(straight)) {
+      return false
+    } else {
+      return straight[0]
+    }
+  }
+
+
+  let a = straight(rankTable1)
+  let b = straight(rankTable2)
+
+  if (a ||  b)
+    if (a) {
+      return a
+    }
+    else {
+      return b
+    }
+
+
+
+}
+
 function hasThreeOfaKind(hand, communitycards) {
   rankTable = [
     "A",
@@ -177,12 +277,7 @@ function hasThreeOfaKind(hand, communitycards) {
 
   //get all card ranks:
   let cards = hand.concat(communitycards)
-  let cardsRank = []
-  // console.log('unsorted');
-  // console.log(cards);
-  // for (card in cards) {
-  //   cardsRank.push(cards[card][0]) get all the card Ranks (strip the suits)
-  // }
+
   cards.sort(function sort(a, b) {
     if (rankTable.indexOf(a[0]) < rankTable.indexOf(b[0])) {
       return -1
@@ -257,12 +352,7 @@ function hasTwoPairs(hand, communitycards) {
 
   //get all card ranks:
   let cards = hand.concat(communitycards)
-  let cardsRank = []
-  // console.log('unsorted');
-  // console.log(cards);
-  // for (card in cards) {
-  //   cardsRank.push(cards[card][0]) get all the card Ranks (strip the suits)
-  // }
+
   cards.sort(function sort(a, b) {
     if (rankTable.indexOf(a[0]) < rankTable.indexOf(b[0])) {
       return -1
@@ -347,12 +437,7 @@ function hasPair(hand, communitycards) {
 
   //get all card ranks:
   let cards = hand.concat(communitycards)
-  let cardsRank = []
-  // console.log('unsorted');
-  // console.log(cards);
-  // for (card in cards) {
-  //   cardsRank.push(cards[card][0]) get all the card Ranks (strip the suits)
-  // }
+
   cards.sort(function sort(a, b) {
     if (rankTable.indexOf(a[0]) < rankTable.indexOf(b[0])) {
       return -1
@@ -403,14 +488,22 @@ function hasPair(hand, communitycards) {
 
 
 
-console.log(hasPair(["Qc", "Ah"], ["Jc", "8d", "9h", "2c", "2s"]));
-// console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
-// console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
+// console.log(hasPair(["Qc", "Ah"], ["Jc", "8d", "9h", "2c", "2s"]));
+// // console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
+// // console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
+//
+// console.log(hasTwoPairs(["Qc", "Jh"], ["Jc", "9d", "9h", "7s", "2s"]));
+// // console.log(hasTwoPairs(["Qc", "9d"], ["9h", "Jh", "Jc", "7s", "2s"]));
+//
+// console.log(hasThreeOfaKind(["5c", "Jh"], ["4s", "2d", "Kh", "Kd", "Ks"]));
 
-console.log(hasTwoPairs(["Qc", "Jh"], ["Jc", "9d", "9h", "7s", "2s"]));
-// console.log(hasTwoPairs(["Qc", "9d"], ["9h", "Jh", "Jc", "7s", "2s"]));
 
-console.log(hasThreeOfaKind(["5c", "Jh"], ["4s", "2d", "Kh", "Kd", "Ks"]));
+// console.log(hasStraight(["2d", "3h"], ["4c", "Td", "7h", "Ad", "5c"]));
+// console.log(hasStraight(["Ks", "Jh"], ["Tc", "2d", "7h", "Ad", "Qc"]));
+
+// console.log(hasStraight(["8s", "9h"], ["Tc", "2d", "7h", "Ad", "6c"]));
+// console.log(hasStraight(["8s", "9h"], ["Tc", "2d", "7h", "2c", "6c"]));
+// console.log(hasStraight(["8s", "9h"], ["Tc", "Kh", "7h", "Ah", "6c"]));
 
 function setup() {
   g = new Game();
