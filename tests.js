@@ -26,8 +26,11 @@ for (var type in cardTypes) {
     prep = prepare(cardTypes[type])
     // TODO: here I check all the types
     console.log(type + "              " + g.hasPair(prep[0], prep[1]));
-    // console.log(type + "              " + g.hasTwoPairs(prep[0], prep[1]));
+    console.log(type + "              " + g.hasTwoPairs(prep[0], prep[1]));
+    console.log(type + "              " + g.hasThreeOfaKind(prep[0], prep[1]));
+    console.log(type + "              " + g.hasStraight(prep[0], prep[1]));
     // console.log(type + "              " + g.hasTreeOfaKind(prep[0], prep[1]));
+
     // .
     // .
     // .

@@ -158,6 +158,84 @@ class Deck {
   }
 }
 
+function hasFlush(hand, communitycards) {
+  rankTable = [
+    "A",
+    "K",
+    "Q",
+    "J",
+    "T",
+    "9",
+    "8",
+    "7",
+    "6",
+    "5",
+    "4",
+    "3",
+    "2"
+  ]
+
+  let cards = hand.concat(communitycards)
+  cards.sort(function sort(a, b) {
+    if (rankTable.indexOf(a[0]) < rankTable.indexOf(b[0])) {
+      return -1
+    }
+    if (rankTable.indexOf(a[0]) > rankTable.indexOf(b[0])) {
+      return 1
+    }
+    if (rankTable.indexOf(a[0]) == rankTable.indexOf(b[0])) {
+      return 0
+    }
+  })
+
+  // console.log(cards);
+
+  function flushSuit(suit, cards) {
+    flush = [];
+    counter = 0
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i][1] == suit) {
+        counter++
+      }
+    }
+    if (counter >= 5) {
+      // console.log('flush found ' + suit);
+      for (var i = 0; i < cards.length; i++) {
+        if (cards[i][1] == suit) {
+          flush.push(cards[i])
+        }
+      }
+      // console.log(flush);
+      return flush;
+    }
+    else {
+      // console.log('flush NOT found');
+      return undefined;
+    }
+  }
+
+  s = flushSuit('s', cards)
+  c = flushSuit('c', cards)
+  d = flushSuit('d', cards)
+  h = flushSuit('h', cards)
+
+  if (s) {
+    return s.splice(0,5)
+  }
+  else if (c) {
+    return c.splice(0,5)
+  }
+  else if (d) {
+    return d.splice(0,5)
+  }
+  else if (h) {
+    return h.splice(0,5)
+  }
+  else {
+    return undefined
+  }
+}
+
 function hasStraight(hand, communitycards) {
   // for straights we have 2 rank tables - A is highest and A is lowest
   rankTable1 = [
@@ -505,6 +583,13 @@ function hasPair(hand, communitycards) {
 // console.log(hasStraight(["8s", "9h"], ["Tc", "2d", "7h", "2c", "6c"]));
 // console.log(hasStraight(["8s", "9h"], ["Tc", "Kh", "7h", "Ah", "6c"]));
 
+// console.log(hasFlush(["Ts", "9c"], ["3c", "Js", "5s", "2d", "2s"]));
+// console.log(hasFlush(["Th", "9h"], ["3c", "Jh", "5h", "2d", "2h"]));
+// console.log(hasFlush(["Td", "9d"], ["3d", "Jd", "5d", "2c", "2d"]));
+// console.log(hasFlush(["Ts", "9s"], ["3c", "Js", "5s", "2d", "2s"]));
+
+
+
 function setup() {
   g = new Game();
   g.table.seatPlayer(new Player(), 0);
@@ -546,5 +631,8 @@ function setup() {
 // console.log(deck.cards);
 
 module.exports = {
-  hasPair
+  hasPair,
+  hasTwoPairs,
+  hasThreeOfaKind,
+  hasStraight
 };
