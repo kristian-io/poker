@@ -158,6 +158,20 @@ class Deck {
   }
 }
 
+function hasFullhouse(hand, communitycards) {
+  pair = hasPair(hand, communitycards);
+  threeOfaKind = hasThreeOfaKind(hand, communitycards);
+
+  console.log(hand + ", " + communitycards);
+  console.log(pair);
+  console.log(threeOfaKind);
+
+  if (pair && threeOfaKind) {
+    // console.log('yas');
+    return [threeOfaKind[0], pair[0]]
+  }
+}
+
 function hasFlush(hand, communitycards) {
   rankTable = [
     "A",
@@ -207,8 +221,7 @@ function hasFlush(hand, communitycards) {
       }
       // console.log(flush);
       return flush;
-    }
-    else {
+    } else {
       // console.log('flush NOT found');
       return undefined;
     }
@@ -220,18 +233,14 @@ function hasFlush(hand, communitycards) {
   h = flushSuit('h', cards)
 
   if (s) {
-    return s.splice(0,5)
-  }
-  else if (c) {
-    return c.splice(0,5)
-  }
-  else if (d) {
-    return d.splice(0,5)
-  }
-  else if (h) {
-    return h.splice(0,5)
-  }
-  else {
+    return s.splice(0, 5)
+  } else if (c) {
+    return c.splice(0, 5)
+  } else if (d) {
+    return d.splice(0, 5)
+  } else if (h) {
+    return h.splice(0, 5)
+  } else {
     return undefined
   }
 }
@@ -288,20 +297,17 @@ function hasStraight(hand, communitycards) {
       return rankTable.indexOf(card[0])
     }
 
-      // console.log('sorted');
-      // console.log(cards);
+    // console.log('sorted');
+    // console.log(cards);
 
 
     let straight = []
     for (var i = 0; i < 3; i++) {
-      if (rank(cards[i],rankTable) + 1 == rank(cards[i + 1],rankTable)
-          &&
-          rank(cards[i + 1],rankTable) + 1 == rank(cards[i + 2],rankTable)
-          &&
-          rank(cards[i + 2],rankTable) + 1 == rank(cards[i + 3],rankTable)
-          &&
-          rank(cards[i + 3],rankTable) + 1 == rank(cards[i + 4],rankTable)
-        ) {
+      if (rank(cards[i], rankTable) + 1 == rank(cards[i + 1], rankTable) &&
+        rank(cards[i + 1], rankTable) + 1 == rank(cards[i + 2], rankTable) &&
+        rank(cards[i + 2], rankTable) + 1 == rank(cards[i + 3], rankTable) &&
+        rank(cards[i + 3], rankTable) + 1 == rank(cards[i + 4], rankTable)
+      ) {
         // console.log('found straigt');
         straight.push([
           cards[i],
@@ -324,13 +330,13 @@ function hasStraight(hand, communitycards) {
   let a = straight(rankTable1)
   let b = straight(rankTable2)
 
-  if (a ||  b)
+  if (a || b)
     if (a) {
       return a
     }
-    else {
-      return b
-    }
+  else {
+    return b
+  }
 
 
 
@@ -375,8 +381,7 @@ function hasThreeOfaKind(hand, communitycards) {
     if (i + 1 == cards.length) { //in the next if(){} we are checking if the NEXT element is the same, we have to break if we are on the last element
       // console.log('fuck');
       break;
-    }
-    else if (i + 2 == cards.length) { //in the next if(){} we are checking if the NEXT+1 element is the same, we have to break if we are on the last element
+    } else if (i + 2 == cards.length) { //in the next if(){} we are checking if the NEXT+1 element is the same, we have to break if we are on the last element
       // console.log('fuck');
       break;
     }
@@ -400,8 +405,7 @@ function hasThreeOfaKind(hand, communitycards) {
 
       if (threeOfaKind[0][0] == cards[i] || threeOfaKind[0][1] == cards[i] || threeOfaKind[0][2] == cards[i]) {
         // restOftheHand.push(cards[i])
-      }
-      else {
+      } else {
         restOftheHand.push(cards[i])
       }
     }
@@ -479,8 +483,7 @@ function hasTwoPairs(hand, communitycards) {
       // console.log('pairs[1][1] != cards[i] ' + (pairs[1][1] != cards[i]) );
       if (pairs[0][0] == cards[i] || pairs[0][1] == cards[i] || pairs[1][0] == cards[i] || pairs[1][1] == cards[i]) {
         // restOftheHand.push(cards[i])
-      }
-      else {
+      } else {
         restOftheHand.push(cards[i])
       }
       // if (pairs[1][0] != cards[i] || pairs[1][1] != cards[i]) {
@@ -548,7 +551,13 @@ function hasPair(hand, communitycards) {
   // console.log(pairs);
 
   if (!Array.isArray(pairs) || pairs.length != 1) {
-    return false
+    // TODO: do we want to return "pairs" even if the hand doesnt qualify for 1 pair?????????????!!!!!! its handy for fullHouse
+    if (pairs.length > 1) {
+      return pairs;
+    }
+    else {
+      return undefined;
+    }
   } else {
     restOftheHand = []
     for (var i = 0; i < cards.length; i++) {
@@ -560,15 +569,26 @@ function hasPair(hand, communitycards) {
     // console.log(restOftheHand.splice(0,3));
     // return [pair, restOftheHand]
     return [
-      pairs[0], restOftheHand[0], restOftheHand[1], restOftheHand[2]]
+      pairs[0], restOftheHand[0], restOftheHand[1], restOftheHand[2]
+    ]
   }
 }
 
 
+function setup() {
+  g = new Game();
+  g.table.seatPlayer(new Player(), 0);
+  // g.table.seatPlayer(new Player(), 1);
+  g.table.dealCards();
+  g.table.dealFlop();
+  g.table.dealTurn();
+  g.table.dealRiver();
+}
+
 
 // console.log(hasPair(["Qc", "Ah"], ["Jc", "8d", "9h", "2c", "2s"]));
-// // console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
-// // console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
+// console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
+// console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "8h", "8s", "Qs"]));
 //
 // console.log(hasTwoPairs(["Qc", "Jh"], ["Jc", "9d", "9h", "7s", "2s"]));
 // // console.log(hasTwoPairs(["Qc", "9d"], ["9h", "Jh", "Jc", "7s", "2s"]));
@@ -588,17 +608,10 @@ function hasPair(hand, communitycards) {
 // console.log(hasFlush(["Td", "9d"], ["3d", "Jd", "5d", "2c", "2d"]));
 // console.log(hasFlush(["Ts", "9s"], ["3c", "Js", "5s", "2d", "2s"]));
 
+console.log(hasFullhouse(["8s", "9h"], ["8c", "8d", "7h", "Ah", "9c"]));
+console.log(hasFullhouse(["Qc", "Jh"], ["Jc", "8d", "8h", "8s", "Qs"]));
+console.log(hasFullhouse(["8s", "2h"], ["8c", "8d", "7h", "2s", "9c"]));   // not OK....// BUG: returns: [ [ '8s', '8c', '8d' ], [ '8s', '8c' ] ]
 
-
-function setup() {
-  g = new Game();
-  g.table.seatPlayer(new Player(), 0);
-  // g.table.seatPlayer(new Player(), 1);
-  g.table.dealCards();
-  g.table.dealFlop();
-  g.table.dealTurn();
-  g.table.dealRiver();
-}
 
 // setup()
 // console.log(hasPair(g.table.seats[0].hand, g.table.communitycards));
