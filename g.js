@@ -158,6 +158,8 @@ class Deck {
   }
 }
 
+
+
 function hasFullhouse(hand, communitycards) {
   pairs = hasPair(hand, communitycards);
   threeOfaKind = hasThreeOfaKind(hand, communitycards);

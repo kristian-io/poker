@@ -7,14 +7,14 @@ const cardTypes = {
   threeOfaKind: ["Kd", "Jh", "Ks", "Kh", "2d", "5c", "4s"],
   straight: ["8s", "9h", "Tc", "2d", "7h", "Ad", "6c"],
   flush: ["Ts", "9s", "3c", "Js", "5s", "2d", "2s"],
-  fullHouse: ["", "", "", "", "", "", ""],
+  fullHouse: ["8s", "2h", "8c", "8d", "7h", "2s", "9c"],
   fourOfaKind: ["", "", "", "", "", "", ""],
   straightFlush: ["", "", "", "", "", "", ""],
   royalFlush: ["", "", "", "", "", "", ""]
 }
 
 
-// returns array of hand and community cards [hand,communitycards] - this is the format that the hasPair(), hasFlush() .. expect 
+// returns array of hand and community cards [hand,communitycards] - this is the format that the hasPair(), hasFlush() .. expect
 function prepare(cardType) {
   var temp = cardType
   var tempH = temp.splice(0,2)
