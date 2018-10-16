@@ -159,16 +159,33 @@ class Deck {
 }
 
 function hasFullhouse(hand, communitycards) {
-  pair = hasPair(hand, communitycards);
+  pairs = hasPair(hand, communitycards);
   threeOfaKind = hasThreeOfaKind(hand, communitycards);
 
-  console.log(hand + ", " + communitycards);
-  console.log(pair);
-  console.log(threeOfaKind);
+  if (pairs && threeOfaKind) {
+    //clean up the pairs array ...
+    let pairs_new = []
+    for (var i = 0; i < pairs.length; i++) {
+      if (pairs[i][0][0] != threeOfaKind[0][0][0]) {
+        //this is very ugly
+        //given 8s,2h, 8c,8d,7h,2s,9c
+        //pairs = [ [ '8s', '8c' ], [ '8c', '8d' ], [ '2h', '2s' ] ]
+        //threeOfaKind = [ [ '8s', '8c', '8d' ], '9c', '7h' ]
+        //we want to remove those "pairs" in pairs array that are actually a 3ofakind...
+        pairs_new.push(pairs[i])
+      }
+    }
 
-  if (pair && threeOfaKind) {
-    // console.log('yas');
-    return [threeOfaKind[0], pair[0]]
+    // console.log(hand + ", " + communitycards);
+    // console.log(pairs_new);
+    // console.log(threeOfaKind);
+
+    if (pairs_new.length == 0) {
+      return undefined;
+    }
+    else {
+      return [threeOfaKind[0], pairs_new[0]]
+    }
   }
 }
 
@@ -608,9 +625,9 @@ function setup() {
 // console.log(hasFlush(["Td", "9d"], ["3d", "Jd", "5d", "2c", "2d"]));
 // console.log(hasFlush(["Ts", "9s"], ["3c", "Js", "5s", "2d", "2s"]));
 
-console.log(hasFullhouse(["8s", "9h"], ["8c", "8d", "7h", "Ah", "9c"]));
-console.log(hasFullhouse(["Qc", "Jh"], ["Jc", "8d", "8h", "8s", "Qs"]));
-console.log(hasFullhouse(["8s", "2h"], ["8c", "8d", "7h", "2s", "9c"]));   // not OK....// BUG: returns: [ [ '8s', '8c', '8d' ], [ '8s', '8c' ] ]
+// console.log(hasFullhouse(["8s", "9h"], ["8c", "8d", "7h", "Ah", "5c"]));
+// console.log(hasFullhouse(["Qc", "Jh"], ["Jc", "8d", "8h", "8s", "Qs"]));
+// console.log(hasFullhouse(["8s", "2h"], ["8c", "8d", "7h", "2s", "9c"]));   // not OK....// BUG: returns: [ [ '8s', '8c', '8d' ], [ '8s', '8c' ] ]
 
 
 // setup()

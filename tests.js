@@ -14,7 +14,7 @@ const cardTypes = {
 }
 
 
-// returns array of hand and community cards [hand,communitycards]
+// returns array of hand and community cards [hand,communitycards] - this is the format that the hasPair(), hasFlush() .. expect 
 function prepare(cardType) {
   var temp = cardType
   var tempH = temp.splice(0,2)
