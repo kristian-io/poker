@@ -158,7 +158,105 @@ class Deck {
   }
 }
 
+function hasStraightFlush(hand, communitycards) {
+  flush = hasFlush(hand, communitycards);
+  straight = hasStraight(hand, communitycards);
 
+  console.log(hand + ", " + communitycards);
+  console.log(flush);
+  console.log(straight);
+
+  if (flush && straight) {
+    // we need to compare - if the arrays are the same, then it's straight flush otherwise it will be a flush...
+    let equals = false;
+    for (var i = 0; i < flush.length; i++) {
+        if (flush[i] != straight[i]) {
+          return false
+        }
+
+    }
+    // flush and straight arrays equal each other we have a straight flush!!!
+    return flush;   // == straight (both are sorted arrays) 
+  }
+  return false;
+}
+
+function hasFourOfaKind(hand, communitycards) {
+  rankTable = [
+    "A",
+    "K",
+    "Q",
+    "J",
+    "T",
+    "9",
+    "8",
+    "7",
+    "6",
+    "5",
+    "4",
+    "3",
+    "2"
+  ]
+
+  //get all card ranks:
+  let cards = hand.concat(communitycards)
+
+  cards.sort(function sort(a, b) {
+    if (rankTable.indexOf(a[0]) < rankTable.indexOf(b[0])) {
+      return -1
+    }
+    if (rankTable.indexOf(a[0]) > rankTable.indexOf(b[0])) {
+      return 1
+    }
+    if (rankTable.indexOf(a[0]) == rankTable.indexOf(b[0])) {
+      return 0
+    }
+  })
+
+  // console.log('sorted');
+  // console.log(cards);
+  let fourOfaKind = []
+  for (var i = 0; i < cards.length; i++) {
+    if (i + 1 == cards.length) { //in the next if(){} we are checking if the NEXT element is the same, we have to break if we are on the last element
+      // console.log('fuck');
+      break;
+    } else if (i + 2 == cards.length) { //in the next if(){} we are checking if the NEXT+1 element is the same, we have to break if we are on the last element
+      // console.log('fuck');
+      break;
+    } else if (i + 3 == cards.length) {
+      break;
+    }
+
+
+    if (cards[i + 1][0] == cards[i][0] && cards[i + 2][0] == cards[i][0] && cards[i + 3][0] == cards[i][0]) {
+      // console.log('found match' + cards[i][0]);
+      fourOfaKind.push([
+        cards[i],
+        cards[i + 1],
+        cards[i + 2],
+        cards[i + 3]
+      ])
+    }
+  }
+  // console.log(pairs);
+
+  if (!Array.isArray(fourOfaKind) || fourOfaKind.length != 1) {
+    return false
+  } else {
+    restOftheHand = []
+    for (var i = 0; i < cards.length; i++) {
+
+      if (fourOfaKind[0][0] == cards[i] || fourOfaKind[0][1] == cards[i] || fourOfaKind[0][2] == cards[i] || fourOfaKind[0][3] == cards[i]) {
+        // restOftheHand.push(cards[i])
+      } else {
+        restOftheHand.push(cards[i])
+      }
+    }
+
+
+    return [fourOfaKind[0], restOftheHand[0]]
+  }
+}
 
 function hasFullhouse(hand, communitycards) {
   pairs = hasPair(hand, communitycards);
@@ -183,7 +281,7 @@ function hasFullhouse(hand, communitycards) {
     // console.log(threeOfaKind);
 
     if (pairs_new.length == 0) {
-      return undefined;
+      return false;
     }
     else {
       return [threeOfaKind[0], pairs_new[0]]
@@ -242,7 +340,7 @@ function hasFlush(hand, communitycards) {
       return flush;
     } else {
       // console.log('flush NOT found');
-      return undefined;
+      return false;
     }
   }
 
@@ -260,7 +358,7 @@ function hasFlush(hand, communitycards) {
   } else if (h) {
     return h.splice(0, 5)
   } else {
-    return undefined
+    return false
   }
 }
 
@@ -575,7 +673,7 @@ function hasPair(hand, communitycards) {
       return pairs;
     }
     else {
-      return undefined;
+      return false;
     }
   } else {
     restOftheHand = []
@@ -630,6 +728,15 @@ function setup() {
 // console.log(hasFullhouse(["8s", "9h"], ["8c", "8d", "7h", "Ah", "5c"]));
 // console.log(hasFullhouse(["Qc", "Jh"], ["Jc", "8d", "8h", "8s", "Qs"]));
 // console.log(hasFullhouse(["8s", "2h"], ["8c", "8d", "7h", "2s", "9c"]));   // not OK....// BUG: returns: [ [ '8s', '8c', '8d' ], [ '8s', '8c' ] ]
+
+// console.log(hasFourOfaKind(["8s", "8h"], ["2c", "8d", "Kh", "2s", "8c"]));
+// console.log(hasFourOfaKind(["Js", "Jh"], ["Tc", "Jd", "Kh", "2s", "Jc"]));
+// console.log(hasFourOfaKind(["2s", "2h"], ["Ac", "2d", "Kh", "3s", "2c"]));
+// console.log(hasFourOfaKind(["8s", "8h"], ["2c", "7d", "Kh", "2s", "8c"]));
+
+// console.log(hasStraightFlush(["Th", "9h"], ["6h", "Ac", "7h", "2s", "8h"]));
+// console.log(hasStraightFlush(["Th", "9h"], ["6s", "Ac", "7h", "2h", "8h"]));
+// console.log(hasStraightFlush(["Th", "9h"], ["6s", "Ac", "7c", "2h", "8h"]));
 
 
 // setup()

@@ -8,8 +8,8 @@ const cardTypes = {
   straight: ["8s", "9h", "Tc", "2d", "7h", "Ad", "6c"],
   flush: ["Ts", "9s", "3c", "Js", "5s", "2d", "2s"],
   fullHouse: ["8s", "2h", "8c", "8d", "7h", "2s", "9c"],
-  fourOfaKind: ["", "", "", "", "", "", ""],
-  straightFlush: ["", "", "", "", "", "", ""],
+  fourOfaKind: ["8s", "8h", "Ac", "8d", "Kh", "2s", "8c"],
+  straightFlush: ["Th", "9h", "6h", "Ac", "7h", "2s", "8h"],
   royalFlush: ["", "", "", "", "", "", ""]
 }
 
