@@ -159,24 +159,28 @@ class Deck {
 }
 
 function hasStraightFlush(hand, communitycards) {
-  flush = hasFlush(hand, communitycards);
+  // flush = hasFlush(hand, communitycards);
   straight = hasStraight(hand, communitycards);
 
-  console.log(hand + ", " + communitycards);
-  console.log(flush);
-  console.log(straight);
-
-  if (flush && straight) {
-    // we need to compare - if the arrays are the same, then it's straight flush otherwise it will be a flush...
-    let equals = false;
-    for (var i = 0; i < flush.length; i++) {
-        if (flush[i] != straight[i]) {
-          return false
-        }
-
+  console.log(hand + "," + communitycards);
+  // console.log(flush);
+  // console.log(straight);
+  if (straight) {
+    flush = hasFlush([], straight)
+    // console.log('------------------> ' + flush);
+    if (flush) {
+      if (flush[0][0] == "A" && flush[1][0] != "K") {
+        //we neeed to move the A at the end of the array
+        flush_new = flush.splice(1,5)
+        flush_new[4] = flush[0]
+        // console.log(flush_new);
+        return flush_new;
+      }
+      else {
+        return flush;
+      }
     }
-    // flush and straight arrays equal each other we have a straight flush!!!
-    return flush;   // == straight (both are sorted arrays) 
+    return false
   }
   return false;
 }
@@ -727,7 +731,7 @@ function setup() {
 
 // console.log(hasFullhouse(["8s", "9h"], ["8c", "8d", "7h", "Ah", "5c"]));
 // console.log(hasFullhouse(["Qc", "Jh"], ["Jc", "8d", "8h", "8s", "Qs"]));
-// console.log(hasFullhouse(["8s", "2h"], ["8c", "8d", "7h", "2s", "9c"]));   // not OK....// BUG: returns: [ [ '8s', '8c', '8d' ], [ '8s', '8c' ] ]
+// console.log(hasFullhouse(["8s", "2h"], ["8c", "8d", "7h", "2s", "9c"]));
 
 // console.log(hasFourOfaKind(["8s", "8h"], ["2c", "8d", "Kh", "2s", "8c"]));
 // console.log(hasFourOfaKind(["Js", "Jh"], ["Tc", "Jd", "Kh", "2s", "Jc"]));
@@ -736,8 +740,8 @@ function setup() {
 
 // console.log(hasStraightFlush(["Th", "9h"], ["6h", "Ac", "7h", "2s", "8h"]));
 // console.log(hasStraightFlush(["Th", "9h"], ["6s", "Ac", "7h", "2h", "8h"]));
-// console.log(hasStraightFlush(["Th", "9h"], ["6s", "Ac", "7c", "2h", "8h"]));
-
+// console.log(hasStraightFlush(["Th", "4h"], ["3h", "Ah", "7c", "2h", "5h"]));
+// console.log(hasStraightFlush(["Th", "Qh"], ["Jh", "Ah", "7c", "Kh", "5h"]));
 
 // setup()
 // console.log(hasPair(g.table.seats[0].hand, g.table.communitycards));
