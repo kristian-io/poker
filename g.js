@@ -620,7 +620,6 @@ function hasTwoPairs(hand, communitycards) {
     }
   }
 
-
 function hasPair(hand, communitycards) {
   rankTable = [
     "A",
@@ -698,32 +697,32 @@ function hasPair(hand, communitycards) {
 
 //this function return the hand using the helper functons hasPair,hasStraight,etc.
 function hasHand(hand, communitycards) {
-  console.log('------------------------------------------');
-  console.log(hand + ',' + communitycards);
+  // console.log('------------------------------------------');
+  // console.log(hand + ',' + communitycards);
   //we start evaluating from the top rankings...
   if (h = hasStraightFlush(hand,communitycards)) {
-    return h;
+    return ['straight flush',8,h];
   }
   else if (h = hasFourOfaKind(hand, communitycards)) {
-    return h;
+    return ['four of a kind',7,h];
   }
   else if (h = hasFullhouse(hand, communitycards)) {
-    return h;
+    return ['full house',6,h];
   }
   else if (h = hasFlush(hand, communitycards)) {
-      return h;
+    return ['flush',5,h];
   }
   else if (h = hasStraight(hand, communitycards)) {
-      return h;
+    return ['straight',4,h];
   }
   else if (h = hasThreeOfaKind(hand, communitycards)) {
-    return h;
+    return ['three of a kind',3,h];
   }
   else if (h = hasTwoPairs(hand, communitycards)) {
-    return h;
+    return ['two pairs',2,h];
   }
   else if (h = hasPair(hand, communitycards)) {
-      return h;
+    return ['pair',1,h];
   }
   else {
     rankTable = [
@@ -756,7 +755,7 @@ function hasHand(hand, communitycards) {
         return 0
       }
     });
-    return cards.splice(0,4);
+    return ['high card',0,cards.splice(0,5)];
   }
 }
 
@@ -773,12 +772,78 @@ function setup() {
   g.table.dealRiver();
 }
 
-// for (var i = 0; i < 100; i++) {
-//   deck = new Deck();
-//   deck.shuffle()
-//   console.log(hasHand(deck.deal(2),deck.deal(5)));
-// }
+function handEvaluation(count) {
+  for (var i = 0; i < count; i++) {
+    deck = new Deck();
+    deck.shuffle()
+    a = deck.deal(2)
+    b = deck.deal(5)
+    console.log('==============================================================');
+    console.log(a + ',' + b );
+    console.log(hasHand(a ,b));
+  }
+}
 
+// handEvaluation(30)
+
+
+
+function statProof(tries) {
+  //statistical proof of correct rankings
+  //generate [tries] hands and count occurence of the hands
+  counts = [0,0,0,0,0,0,0,0,0]
+  for (var i = 0; i < tries; i++) {
+    deck = new Deck();
+    deck.shuffle()
+    // console.log(hasHand(deck.deal(2),deck.deal(5)));
+    switch (hasHand(deck.deal(2),deck.deal(5))[1]) {
+      case 0:
+          // console.log('haha');
+          counts[0]++;
+        break;
+      case 1:
+          // console.log('hihi');
+          counts[1]++;
+        break;
+      case 2:
+          counts[2]++;
+        break;
+      case 3:
+          counts[3]++;
+        break;
+      case 4:
+          counts[4]++;
+        break;
+      case 5:
+          counts[5]++;
+        break;
+      case 6:
+          counts[6]++;
+        break;
+      case 7:
+          counts[7]++;
+        break;
+      case 8:
+          counts[8]++;
+        break;
+      default:
+          console.log('ups!!!!!!!!!');
+    }
+  }
+  console.log(tries + " hands simulated");
+  console.log('TYPE           |OCCURENCE        |PERCENTAGE         |TOTAL   ');
+  console.log('high card      |' + counts[0] + '              |' + counts[0]*100.0/tries + '%               |     ' + tries)
+  console.log('pair           |' + counts[1] + '              |' + counts[1]*100.0/tries + '%               |     ' + tries)
+  console.log('two pairs      |' + counts[2] + '              |' + counts[2]*100.0/tries + '%               |     ' + tries)
+  console.log('three of a kind|' + counts[3] + '              |' + counts[3]*100.0/tries + '%               |     ' + tries)
+  console.log('straight       |' + counts[4] + '              |' + counts[4]*100.0/tries + '%               |     ' + tries)
+  console.log('flush          |' + counts[5] + '              |' + counts[5]*100.0/tries + '%               |     ' + tries)
+  console.log('full house     |' + counts[6] + '              |' + counts[6]*100.0/tries + '%               |     ' + tries)
+  console.log('four of a kind |' + counts[7] + '              |' + counts[7]*100.0/tries + '%               |     ' + tries)
+  console.log('straight flush |' + counts[8] + '              |' + counts[8]*100.0/tries + '%               |     ' + tries)
+}
+
+// statProof(150000000)
 
 // console.log(hasHand(['Qc','Kc'],['9h','Qd','7c','9d','Kd']));
 // console.log(hasFullhouse(['Qc','Kc'],['9h','Qd','7c','9d','Kd']));
@@ -864,8 +929,9 @@ function setup() {
 // console.log(deck.cards);
 
 module.exports = {
-  hasPair,
-  hasTwoPairs,
-  hasThreeOfaKind,
-  hasStraight
+  Game,
+  Table,
+  Player,
+  Deck,
+  hasHand,
 };
