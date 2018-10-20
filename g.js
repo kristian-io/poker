@@ -153,7 +153,7 @@ class Deck {
       results.push(this.cards.shift());
       count--;
     }
-    console.log(results);
+    // console.log(results);
     return results;
   }
 }
@@ -162,7 +162,7 @@ function hasStraightFlush(hand, communitycards) {
   // flush = hasFlush(hand, communitycards);
   straight = hasStraight(hand, communitycards);
 
-  console.log(hand + "," + communitycards);
+  // console.log(hand + "," + communitycards);
   // console.log(flush);
   // console.log(straight);
   if (straight) {
@@ -531,7 +531,7 @@ function hasThreeOfaKind(hand, communitycards) {
       }
     }
 
-
+    // console.log(restOftheHand);
     return [threeOfaKind[0], restOftheHand[0], restOftheHand[1]]
   }
 }
@@ -586,7 +586,7 @@ function hasTwoPairs(hand, communitycards) {
   }
   // console.log(pairs);
 
-  if (!Array.isArray(pairs) || pairs.length != 2) {
+  if (!Array.isArray(pairs) || pairs.length <= 1) {
     return false
   } else {
     restOftheHand = []
@@ -612,13 +612,14 @@ function hasTwoPairs(hand, communitycards) {
       // }
 
     }
+
     // console.log(restOftheHand);
     // console.log(restOftheHand.splice(0,3));
     // return [pair, restOftheHand]
-    return [pairs[0], pairs[1], restOftheHand[0]]
+      return [pairs[0], pairs[1], restOftheHand[0]]
+    }
   }
 
-}
 
 function hasPair(hand, communitycards) {
   rankTable = [
@@ -695,6 +696,72 @@ function hasPair(hand, communitycards) {
   }
 }
 
+//this function return the hand using the helper functons hasPair,hasStraight,etc.
+function hasHand(hand, communitycards) {
+  console.log('------------------------------------------');
+  console.log(hand + ',' + communitycards);
+  //we start evaluating from the top rankings...
+  if (h = hasStraightFlush(hand,communitycards)) {
+    return h;
+  }
+  else if (h = hasFourOfaKind(hand, communitycards)) {
+    return h;
+  }
+  else if (h = hasFullhouse(hand, communitycards)) {
+    return h;
+  }
+  else if (h = hasFlush(hand, communitycards)) {
+      return h;
+  }
+  else if (h = hasStraight(hand, communitycards)) {
+      return h;
+  }
+  else if (h = hasThreeOfaKind(hand, communitycards)) {
+    return h;
+  }
+  else if (h = hasTwoPairs(hand, communitycards)) {
+    return h;
+  }
+  else if (h = hasPair(hand, communitycards)) {
+      return h;
+  }
+  else {
+    rankTable = [
+      "A",
+      "K",
+      "Q",
+      "J",
+      "T",
+      "9",
+      "8",
+      "7",
+      "6",
+      "5",
+      "4",
+      "3",
+      "2"
+    ]
+
+    //get all card ranks:
+    let cards = hand.concat(communitycards)
+
+    cards.sort(function sort(a, b) {
+      if (rankTable.indexOf(a[0]) < rankTable.indexOf(b[0])) {
+        return -1
+      }
+      if (rankTable.indexOf(a[0]) > rankTable.indexOf(b[0])) {
+        return 1
+      }
+      if (rankTable.indexOf(a[0]) == rankTable.indexOf(b[0])) {
+        return 0
+      }
+    });
+    return cards.splice(0,4);
+  }
+}
+
+
+
 
 function setup() {
   g = new Game();
@@ -705,6 +772,29 @@ function setup() {
   g.table.dealTurn();
   g.table.dealRiver();
 }
+
+// for (var i = 0; i < 100; i++) {
+//   deck = new Deck();
+//   deck.shuffle()
+//   console.log(hasHand(deck.deal(2),deck.deal(5)));
+// }
+
+
+// console.log(hasHand(['Qc','Kc'],['9h','Qd','7c','9d','Kd']));
+// console.log(hasFullhouse(['Qc','Kc'],['9h','Qd','7c','9d','Kd']));
+// console.log(hasTwoPairs(['Qc','Kc'],['9h','Qd','7c','9d','Kd']));
+// console.log(hasPair(['Qc','Kc'],['9h','Qd','7c','9d','Kd']));
+// console.log(hasHand(["Qc", "9d"], ["9h", "Jh", "Jc", "7s", "2s"]));
+// console.log(hasHand(["8s", "2h"], ["8c", "8d", "7h", "2s", "9c"]));
+// console.log(hasHand(["8s", "8h"], ["2c", "7d", "Kh", "2s", "8c"]));
+// console.log(hasHand(["Th", "Qh"], ["Jh", "Ah", "7c", "Kh", "5h"]));
+// console.log(hasHand());
+// console.log(hasHand());
+// console.log(hasHand());
+// console.log(hasHand());
+// console.log(hasHand());
+// console.log(hasHand());
+// console.log(hasHand());
 
 
 // console.log(hasPair(["Qc", "Ah"], ["Jc", "8d", "9h", "2c", "2s"]));
