@@ -422,20 +422,38 @@ function hasStraight(hand, communitycards) {
     // console.log(cards);
 
 
+    //we need to remove "duplicates" (pairs) otherwise the for loop below will not detect straight correctly
+    //if the straight contains a pair, for example 6,5,4,3,3,2 ...
+    cards_new = [];
+    for (var i = 0; i < cards.length; i++) {
+      if (!cards[i+1]) {
+        cards_new.push(cards[i]);
+        break;
+      }
+      if (cards[i][0] != cards[i+1][0]) {
+        cards_new.push(cards[i]);
+      }
+    }
+
+
+
     let straight = []
     for (var i = 0; i < 3; i++) {
-      if (rank(cards[i], rankTable) + 1 == rank(cards[i + 1], rankTable) &&
-        rank(cards[i + 1], rankTable) + 1 == rank(cards[i + 2], rankTable) &&
-        rank(cards[i + 2], rankTable) + 1 == rank(cards[i + 3], rankTable) &&
-        rank(cards[i + 3], rankTable) + 1 == rank(cards[i + 4], rankTable)
+      if (!cards_new[i + 4] || !cards_new[i+3]) {
+        break;
+      }
+      if (rank(cards_new[i], rankTable) + 1 == rank(cards_new[i + 1], rankTable) &&
+        rank(cards_new[i + 1], rankTable) + 1 == rank(cards_new[i + 2], rankTable) &&
+        rank(cards_new[i + 2], rankTable) + 1 == rank(cards_new[i + 3], rankTable) &&
+        rank(cards_new[i + 3], rankTable) + 1 == rank(cards_new[i + 4], rankTable)
       ) {
-        // console.log('found straigt');
+        // console.log('found straight');
         straight.push([
-          cards[i],
-          cards[i + 1],
-          cards[i + 2],
-          cards[i + 3],
-          cards[i + 4]
+          cards_new[i],
+          cards_new[i + 1],
+          cards_new[i + 2],
+          cards_new[i + 3],
+          cards_new[i + 4]
         ])
       }
     }
@@ -449,7 +467,9 @@ function hasStraight(hand, communitycards) {
 
 
   let a = straight(rankTable1)
+  // console.log('a: ' + a);
   let b = straight(rankTable2)
+  // console.log('b: ' + b);
 
   if (a || b)
     if (a) {
@@ -759,9 +779,6 @@ function hasHand(hand, communitycards) {
   }
 }
 
-
-
-
 function setup() {
   g = new Game();
   g.table.seatPlayer(new Player(), 0);
@@ -844,8 +861,23 @@ function statProof(tries) {
 }
 
 // statProof(150000000)
+// C:\Users\LENOVO\Documents\Projects\poker>node g.js
+// 150000000 hands simulated
+// TYPE           |OCCURENCE        |PERCENTAGE         |TOTAL
+// high card      |26114155              |17.409436666666668%               |     150000000
+// pair           |67091604              |44.727736%               |     150000000
+// two pairs      |35542104              |23.694736%               |     150000000
+// three of a kind|7278088              |4.852058666666666%               |     150000000
+// straight       |5307236              |3.5381573333333334%               |     150000000
+// flush          |4560394              |3.0402626666666666%               |     150000000
+// full house     |3832713              |2.555142%               |     150000000
+// four of a kind |252029              |0.16801933333333333%               |     150000000
+// straight flush |21677              |0.014451333333333333%               |     150000000
 
-// console.log(hasHand(['Qc','Kc'],['9h','Qd','7c','9d','Kd']));
+
+
+// console.log(hasHand(['6c','5c'],['3h','2d','3s','Ac','4s']));
+// console.log(hasStraight(['6c','5c'],['3h','2d','3s','Ac','4s']));
 // console.log(hasFullhouse(['Qc','Kc'],['9h','Qd','7c','9d','Kd']));
 // console.log(hasTwoPairs(['Qc','Kc'],['9h','Qd','7c','9d','Kd']));
 // console.log(hasPair(['Qc','Kc'],['9h','Qd','7c','9d','Kd']));
@@ -877,7 +909,7 @@ function statProof(tries) {
 
 // console.log(hasStraight(["8s", "9h"], ["Tc", "2d", "7h", "Ad", "6c"]));
 // console.log(hasStraight(["8s", "9h"], ["Tc", "2d", "7h", "2c", "6c"]));
-// console.log(hasStraight(["8s", "9h"], ["Tc", "Kh", "7h", "Ah", "6c"]));
+// console.log(hasStraight(["Qs", "Qh"], ["Tc", "Kh", "7h", "Ah", "Jc"]));
 
 // console.log(hasFlush(["Ts", "9c"], ["3c", "Js", "5s", "2d", "2s"]));
 // console.log(hasFlush(["Th", "9h"], ["3c", "Jh", "5h", "2d", "2h"]));
