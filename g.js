@@ -803,6 +803,129 @@ function handEvaluation(count) {
 
 // handEvaluation(30)
 
+function getWinner(holeCards, communitycards) {
+  rankTable = [
+    "A",
+    "K",
+    "Q",
+    "J",
+    "T",
+    "9",
+    "8",
+    "7",
+    "6",
+    "5",
+    "4",
+    "3",
+    "2"
+  ]
+
+  function rank(card, rankTable) {
+    return rankTable.indexOf(card[0])
+  }
+
+  //holeCards is an array containing arrays of hole cards of individual playes
+  //function returns position of player who won or positions of playes who are splitting the pot
+  hasHandResults = []
+  for (var i = 0; i < holeCards.length; i++) {
+    hasHandResults.push(hasHand(holeCards[i], communitycards))
+  }
+  let hasHandResultsSorted = hasHandResults.concat(); //copy the array
+  hasHandResultsSorted.sort(function (a, b) {
+      if (a[1] < b[1]) {
+        return 1;
+      }
+      else if (a[1] > b[1]) {
+        return -1;
+      }
+      else {
+        return 0;
+      }
+  })
+  console.log(hasHandResults);
+  console.log(hasHandResultsSorted);
+
+  if (hasHandResultsSorted[0][1] != hasHandResultsSorted[1][1]) {
+    return hasHandResults.indexOf(hasHandResultsSorted[0])
+  }
+  else {
+    //here we need to start comparing hands with equal ranking...
+
+    //get the equal ranks hands:
+    equalRankHands = []
+    for (var i = 0; i < hasHandResultsSorted.length; i++) {
+      if (hasHandResultsSorted[i][1] == hasHandResultsSorted[0][1]) {
+        equalRankHands.push(hasHandResultsSorted[i])
+      }
+    }
+    // console.log(equalRankHands);
+    //compare hands based on the ranks
+    switch (equalRankHands[0][1]) {
+      case 0:
+        //high card
+        // index = 0
+        // for (var i = 0; i < equalRankHands.length; i++) {
+        //   equalRankHands[i]
+        // }
+
+        break;
+      case 1:
+
+        break;
+      case 2:
+
+        break;
+      case 3:
+
+        break;
+      case 4:
+
+        break;
+      case 5:
+
+        break;
+      case 6:
+
+        break;
+      case 7:
+
+        break;
+      case 8:
+
+        break;
+
+      default:
+
+    }
+
+
+
+
+
+
+
+
+
+
+    //SPLIT PROCEDURE
+    // split = [];
+    // split.push(hasHandResultsSorted[0])
+    // for (var i = 0; i < hasHandResultsSorted.length; i++) {
+    //   if (!hasHandResultsSorted[i + 1]) {
+    //     break;
+    //   }
+    //   if (hasHandResultsSorted[i][1] == hasHandResultsSorted[i + 1][1]) {
+    //     split.push(hasHandResultsSorted[i + 1])
+    //   }
+    // }
+    // return split;
+  }
+}
+
+// console.log(getWinner([['6c','4h'],['Ts','5h'],['Ad','Jh'],['4d','Th']],['5d','3c','Td','2s','Ah']));
+console.log(getWinner([['Ad','Jh'],['9d','Ah']],['5d','3c','Td','2s','8h']));
+
+
 
 
 function statProof(tries) {
@@ -899,7 +1022,7 @@ function statProof(tries) {
 // console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "8h", "8s", "Qs"]));
 //
 // console.log(hasTwoPairs(["Qc", "Jh"], ["Jc", "9d", "9h", "7s", "2s"]));
-// // console.log(hasTwoPairs(["Qc", "9d"], ["9h", "Jh", "Jc", "7s", "2s"]));
+// console.log(hasTwoPairs(["Qc", "9d"], ["9h", "Jh", "Jc", "7s", "2s"]));
 //
 // console.log(hasThreeOfaKind(["5c", "Jh"], ["4s", "2d", "Kh", "Kd", "Ks"]));
 
