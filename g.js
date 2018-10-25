@@ -804,6 +804,8 @@ function handEvaluation(count) {
 // handEvaluation(30)
 
 function getWinner(holeCards, communitycards) {
+  //holeCards is an array containing arrays of hole cards of individual playes
+  //function returns position of player who won or array of positions of playes who are splitting the pot
   rankTable = [
     "A",
     "K",
@@ -820,12 +822,28 @@ function getWinner(holeCards, communitycards) {
     "2"
   ]
 
+  function sortByNthElement(input, n) {
+    //input is array of arrays - 2d array
+    let inputSorted = input.concat(); //copy the array
+    inputSorted.sort(function (a, b) {
+        if (a[n] < b[n]) {
+          return -1;
+        }
+        else if (a[n] > b[n]) {
+          return 1;
+        }
+        else {
+          return 0;
+        }
+    })
+    return inputSorted;
+  }
+
+
   function rank(card, rankTable) {
     return rankTable.indexOf(card[0])
   }
 
-  //holeCards is an array containing arrays of hole cards of individual playes
-  //function returns position of player who won or positions of playes who are splitting the pot
   hasHandResults = []
   for (var i = 0; i < holeCards.length; i++) {
     hasHandResults.push(hasHand(holeCards[i], communitycards))
@@ -842,9 +860,11 @@ function getWinner(holeCards, communitycards) {
         return 0;
       }
   })
-  console.log(hasHandResults);
-  console.log(hasHandResultsSorted);
+  // console.log(hasHandResults);
+  // console.log(hasHandResultsSorted);
 
+
+  //as we have the hands sorted; if the second hand rank  is not the same as first; first hand is a winner
   if (hasHandResultsSorted[0][1] != hasHandResultsSorted[1][1]) {
     return hasHandResults.indexOf(hasHandResultsSorted[0])
   }
@@ -860,13 +880,92 @@ function getWinner(holeCards, communitycards) {
     }
     // console.log(equalRankHands);
     //compare hands based on the ranks
+
+
+
     switch (equalRankHands[0][1]) {
       case 0:
-        //high card
-        // index = 0
-        // for (var i = 0; i < equalRankHands.length; i++) {
-        //   equalRankHands[i]
-        // }
+        // we have high cards
+
+        //lets get just the 2d array of hands
+        // + lets transform the array to contain just ranks of the hands (we need that to compare)
+
+        hands = [] //will still keep the order as equalRankHands, meaning hands[i] == equalRankHands[i][2]
+        for (var i = 0; i < equalRankHands.length; i++) {
+          hands.push(equalRankHands[i][2]);
+        }
+
+        for (var j = 0; j < hands.length; j++) {
+          for (var i = 0; i < 5; i++) {
+            hands[j][i] = rank(hands[j][i],rankTable);
+          }
+        }
+
+        // console.log(hands);
+
+
+        //win = position of the winner in equalRankHands
+        //split = array of positions of those who split the pot
+        win = []
+        split = []
+
+        //now we can sortByNthElement and start comparing...
+        i = 0
+        while (!win[0] || !split[0]) {
+          // console.log('i = ' + i);
+          //sort by i-th position and start comparing
+          handsSorted = sortByNthElement(hands, i)
+          // console.log(handsSorted);
+          if (handsSorted[0][i] != handsSorted[1][i]) {
+            //we have a winner (because 0th card doesnt equal than 1st)
+            // console.log('we have a winner based on i = ' + i);
+            win.push(handsSorted[0])
+            break;
+          } else {
+            //we dont have a winner based on i-th element /if i = 4 its a split otherwise we need to continue comparing by i + 1 element
+            if (i == 4) {
+              // console.log('we dont have a winner based on ' + i + ' there is a split...');
+              split.push(handsSorted[0])
+              break;
+            } else {
+              // console.log('looks like a split based on ' + i + ' but we are not at the end and need to continue comparing');
+            }
+          }
+          // if we reached last positons we need to break...
+          if (i == 4) {
+            // console.log('i == 4 end...');
+            break;
+          }
+          i++
+        }
+        // console.log('win');
+        // console.log(win);
+        // console.log('split');
+        // console.log(split);
+
+        // in order to return we need to convert ranks back to actual cards...
+
+        if (win[0]) {
+          return hands.indexOf(win[0])
+        } else {
+          splitIndexes = []
+          for (var i = 0; i < hands.length; i++) {
+            e = 0
+            // console.log('i = ' + i);
+            for (var j = 0; j < 5; j++) {
+              // console.log('j = ' + i);
+              if (split[0][j] == hands[i][j]) {
+                e = 1
+              } else {
+                e = 0
+              }
+            }
+            if (e) {
+              splitIndexes.push(i)
+            }
+          }
+          return splitIndexes;
+        }
 
         break;
       case 1:
@@ -897,33 +996,13 @@ function getWinner(holeCards, communitycards) {
       default:
 
     }
-
-
-
-
-
-
-
-
-
-
-    //SPLIT PROCEDURE
-    // split = [];
-    // split.push(hasHandResultsSorted[0])
-    // for (var i = 0; i < hasHandResultsSorted.length; i++) {
-    //   if (!hasHandResultsSorted[i + 1]) {
-    //     break;
-    //   }
-    //   if (hasHandResultsSorted[i][1] == hasHandResultsSorted[i + 1][1]) {
-    //     split.push(hasHandResultsSorted[i + 1])
-    //   }
-    // }
-    // return split;
   }
 }
 
 // console.log(getWinner([['6c','4h'],['Ts','5h'],['Ad','Jh'],['4d','Th']],['5d','3c','Td','2s','Ah']));
-console.log(getWinner([['Ad','Jh'],['9d','Ah']],['5d','3c','Td','2s','8h']));
+// console.log(getWinner([['Kd','Jh'],['Js','Kh'],['Ks', 'Ad']],['5d','3c','Td','2s','8h']));
+// console.log(getWinner([['9d','4h'],['Js','Kh'],['Ks', '6d']],['5d','3c','Td','2s','8h'])); //winner
+// console.log(getWinner([['4d','7c'],['6s','Kh'],['Ks', '6d']],['5d','3c','Td','2s','8h'])); // split
 
 
 
