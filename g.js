@@ -779,6 +779,8 @@ function hasHand(hand, communitycards) {
   }
 }
 
+
+//example setup function that creates the game, seats the player deals hole cards,flop, turn, river
 function setup() {
   g = new Game();
   g.table.seatPlayer(new Player(), 0);
@@ -789,6 +791,7 @@ function setup() {
   g.table.dealRiver();
 }
 
+// manual hand evaluation for 'count' hands....
 function handEvaluation(count) {
   for (var i = 0; i < count; i++) {
     deck = new Deck();
@@ -822,15 +825,18 @@ function getWinner(holeCards, communitycards) {
     "2"
   ]
 
-  function sortByNthElement(input, n) {
-    //input is array of arrays - 2d array
+  function sortByRankByNthElement(input, n) {
+    //input is array of arrays - 2d array - returns the same array sorted by Nth cards rank - usefull for comparing kickers
     let inputSorted = input.concat(); //copy the array
     inputSorted.sort(function (a, b) {
-        if (a[n] < b[n]) {
-          return -1;
-        }
-        else if (a[n] > b[n]) {
+        // console.log('a= ', a);
+        // console.log('a[0]= ', a[0]);
+        // console.log('b= ', b);
+        if (rank(a[n],rankTable) > rank(b[n],rankTable)) {
           return 1;
+        }
+        else if (rank(a[n],rankTable) < rank(b[n],rankTable)) {
+          return -1;
         }
         else {
           return 0;
@@ -844,10 +850,22 @@ function getWinner(holeCards, communitycards) {
     return rankTable.indexOf(card[0])
   }
 
-  hasHandResults = []
+
+  hasHandResults = []   // array of hands in format ['pair', 1, [['Ks','Kh', ...]]] ORDER is preserved from input (holeCards)
   for (var i = 0; i < holeCards.length; i++) {
     hasHandResults.push(hasHand(holeCards[i], communitycards))
   }
+
+  //we will also create a array containing the same order of hands without the description and hand category rank for easier lookup of hands later on
+  //!!!!!!!!!!!this array will be used to lookup the winning hand!!!!!!!!!!!!!!!
+  hasHandResultsSimplified = hasHandResults.concat();
+  for (var i = 0; i < hasHandResults.length; i++) {
+    hasHandResultsSimplified[i] = hasHandResults[i][2];
+  }
+  // console.log('simplified');
+  // console.log(hasHandResultsSimplified);
+
+  //sort it by the HAND category ranks
   let hasHandResultsSorted = hasHandResults.concat(); //copy the array
   hasHandResultsSorted.sort(function (a, b) {
       if (a[1] < b[1]) {
@@ -863,112 +881,218 @@ function getWinner(holeCards, communitycards) {
   // console.log(hasHandResults);
   // console.log(hasHandResultsSorted);
 
+  // console.log('----------------------------------------');
 
-  //as we have the hands sorted; if the second hand rank  is not the same as first; first hand is a winner
+
+  //as we have the hands sorted; we compare the hand category (high card/3ofakind...), if 2nd is not the same as 1st => 1st is the winner
   if (hasHandResultsSorted[0][1] != hasHandResultsSorted[1][1]) {
+    // console.log('we have a winner');
+    // we need to look it up in the hasHandResults array
     return hasHandResults.indexOf(hasHandResultsSorted[0])
   }
   else {
     //here we need to start comparing hands with equal ranking...
 
-    //get the equal ranks hands:
-    equalRankHands = []
+    //get the equal category hands:
+    equalCategoryHands = []
     for (var i = 0; i < hasHandResultsSorted.length; i++) {
       if (hasHandResultsSorted[i][1] == hasHandResultsSorted[0][1]) {
-        equalRankHands.push(hasHandResultsSorted[i])
+        equalCategoryHands.push(hasHandResultsSorted[i])
       }
     }
-    // console.log(equalRankHands);
+    // console.log(equalCategoryHands);
     //compare hands based on the ranks
 
 
-
-    switch (equalRankHands[0][1]) {
+    //we look at the rank from the array of equalRankHands to determine the case: high card, pair, etc...
+    switch (equalCategoryHands[0][1]) {
       case 0:
         // we have high cards
 
-        //lets get just the 2d array of hands
-        // + lets transform the array to contain just ranks of the hands (we need that to compare)
+        // console.log(equalCategoryHands);
+        // [ [ 'high card', 0, [ 'Kd', 'Jh', 'Td', '8h', '5d' ] ],
+        // [ 'high card', 0, [ 'Kh', 'Js', 'Td', '8h', '5d' ] ],
+        // [ 'high card', 0, [ 'Ad', 'Ks', 'Td', '8h', '5d' ] ] ]
+
+        // lets get just the 2d array of hands
+        hands = [] //will still keep the order as equalCategoryHands, meaning hands[i] == equalRankHands[i][2]
+        for (var i = 0; i < equalCategoryHands.length; i++) {
+          hands.push(equalCategoryHands[i][2]);
+        }
+        // console.log(hands);
+        // [ [ 'Td', '9d', '8h', '5d', '4h' ],
+        // [ 'Kh', 'Js', 'Td', '8h', '5d' ],
+        // [ 'Ks', 'Td', '8h', '6d', '5d' ] ]
+
+        //we will keep sorting the hands by Nth card and comparing until the winner is found;
+        //if hand looses based on Nth card we will remove it and not consider it in the next comparision
+
+        n = 0;
+        sorted_temp = hands.concat()
+        // console.log(sorted_temp);
+
+        while (true) {
+          // console.log('n ====================== ', n);
+          //sort by Nth hand starting from 0
+          sorted = sortByRankByNthElement(sorted_temp, n)
+          // console.log('sorted by n= ', n);
+          // console.log(sorted);
+          //compare first 2 if they are not equal we have a winner
+          if (sorted[0][n][0] != sorted[1][n][0]) {
+            //we have a winner
+            // console.log('we have a winner');
+            return hasHandResultsSimplified.indexOf(sorted[0])
+          }
+          else {
+            //otherwise we will only keep those who are equal based on Nth card
+            sorted_temp = []
+            for (var i = 0; i < sorted.length; i++) {
+              if (sorted[0][n][0] == sorted[i][n][0]) {
+                sorted_temp.push(sorted[i])
+              }
+            }
+            // console.log('sorted after purging...');
+            // console.log(sorted_temp);
+          }
+          //if we are not at the end, continue
+          if (n < sorted_temp[0].length -1) {
+            n++;
+          }
+          else if (n == sorted_temp[0].length -1) {
+            //we arived at the end...
+            //hands that remained in sorted_temp are the splitters!!!
+            // console.log('we have a split');
+            // console.log(sorted_temp);
+            splitters = []
+            for (var i = 0; i < sorted_temp.length; i++) {
+              splitters.push(hasHandResultsSimplified.indexOf(sorted_temp[i]))
+            }
+            return splitters;
+          }
+        }
+
+      case 1:
+        // equalRankHands contains pairs...
+
+        // console.log('pairs ');
+        // console.log(equalRankHands);
+        //we will sort the hands based on the pairs and compare 2nd to 1st - if they are different 1st hand is the the winner
 
         hands = [] //will still keep the order as equalRankHands, meaning hands[i] == equalRankHands[i][2]
         for (var i = 0; i < equalRankHands.length; i++) {
           hands.push(equalRankHands[i][2]);
         }
 
-        for (var j = 0; j < hands.length; j++) {
-          for (var i = 0; i < 5; i++) {
-            hands[j][i] = rank(hands[j][i],rankTable);
-          }
-        }
+        console.log(hands);
+        // [ [ [ '2s', '2s' ], 'Kh', 'Td', '8h' ],
+        // [ [ 'Tc', 'Td' ], '8h', '6d', '4d' ],
+        // [ [ '6d', '6d' ], 'Ks', 'Td', '8h' ] ]
 
-        // console.log(hands);
+        handsSortedByPairRanks = hands.concat(); //copy the array
+        handsSortedByPairRanks.sort(function (a, b) {
+            if (rank(a[0][0],rankTable) < rank(b[0][0],rankTable)) {
+              return -1;
+            }
+            else if (rank(a[0][0],rankTable) > rank(b[0][0],rankTable)) {
+              return 1;
+            }
+            else {
+              return 0;
+            }
+        })
 
+        console.log(handsSortedByPairRanks);
+        // [ [ [ 'Tc', 'Td' ], '8h', '6d', '4d' ],
+        // [ [ '6d', '6d' ], 'Ks', 'Td', '8h' ],
+        // [ [ '2s', '2s' ], 'Kh', 'Td', '8h' ] ]
 
-        //win = position of the winner in equalRankHands
-        //split = array of positions of those who split the pot
-        win = []
-        split = []
+        //now we compare 0th and 1st elemets if they dont have the same cards we have a winner (0th card)
+        //else we need to keep comparing based on the rest of the cards in hand (kickers)
 
-        //now we can sortByNthElement and start comparing...
-        i = 0
-        while (!win[0] || !split[0]) {
-          // console.log('i = ' + i);
-          //sort by i-th position and start comparing
-          handsSorted = sortByNthElement(hands, i)
-          // console.log(handsSorted);
-          if (handsSorted[0][i] != handsSorted[1][i]) {
-            //we have a winner (because 0th card doesnt equal than 1st)
-            // console.log('we have a winner based on i = ' + i);
-            win.push(handsSorted[0])
-            break;
-          } else {
-            //we dont have a winner based on i-th element /if i = 4 its a split otherwise we need to continue comparing by i + 1 element
-            if (i == 4) {
-              // console.log('we dont have a winner based on ' + i + ' there is a split...');
-              split.push(handsSorted[0])
+        if (handsSortedByPairRanks[0][0][0][0] != handsSortedByPairRanks[1][0][0][0])  {
+          //we have a winner
+          // console.log(handsSortedByPairRanks[0]);
+          // console.log(hands.indexOf(handsSortedByPairRanks[0]));
+          return hands.indexOf(handsSortedByPairRanks[0])
+        } else {
+          //we need to collect all hands that have the same pair rank as the 0th cards
+          equalPairs = []
+          equalPairs.push(handsSortedByPairRanks[0]);
+          i = 1;
+          while (handsSortedByPairRanks[0][0][0][0] == handsSortedByPairRanks[i][0][0][0]) {
+            equalPairs.push(handsSortedByPairRanks[i])
+            i++;
+            if (i == handsSortedByPairRanks.length ) {
               break;
-            } else {
-              // console.log('looks like a split based on ' + i + ' but we are not at the end and need to continue comparing');
             }
           }
-          // if we reached last positons we need to break...
-          if (i == 4) {
-            // console.log('i == 4 end...');
-            break;
+
+          console.log(equalPairs);
+          // [ [ [ 'Tc', 'Td' ], '8h', '6d', '4d' ],
+          // [ [ 'Ts', 'Td' ], 'Ks', '8h', '6d' ],
+          // [ [ 'Th', 'Td' ], '8h', '6d', '5h' ] ]
+
+          //lets convert the kickers to the ranks
+          equalPairsKickersRanks = equalPairs.concat()
+          for (var j = 0; j < equalPairs.length; j++) {
+            for (var i = 1; i < 4; i++) {
+              equalPairsKickersRanks[j][i] = rank(equalPairs[j][i],rankTable);
+            }
           }
-          i++
-        }
-        // console.log('win');
-        // console.log(win);
-        // console.log('split');
-        // console.log(split);
 
-        // in order to return we need to convert ranks back to actual cards...
-
-        if (win[0]) {
-          return hands.indexOf(win[0])
-        } else {
-          splitIndexes = []
-          for (var i = 0; i < hands.length; i++) {
-            e = 0
-            // console.log('i = ' + i);
-            for (var j = 0; j < 5; j++) {
-              // console.log('j = ' + i);
-              if (split[0][j] == hands[i][j]) {
-                e = 1
-              } else {
-                e = 0
+          split = []
+          win = []
+          i = 1
+          //we can start comparing by the kickers
+          while (true) {
+            sortedbyIthKicker = sortByNthElement(equalPairsKickersRanks, i)
+            console.log(i);
+            console.log(sortedbyIthKicker);
+            //if 2nd doesnt equal 1st we have a winner
+            if (sortedbyIthKicker[0][i] != sortedbyIthKicker[1][i]) {
+              console.log('we have a winner');
+              return hands.indexOf(sortedbyIthKicker[0])
+            }
+            else {
+              console.log('we need to keep comparing the i-th kickers');
+              split.push(sortedbyIthKicker[0])
+              if (i == 3) {
+                console.log('we havent found the winner');
+                break
               }
             }
-            if (e) {
-              splitIndexes.push(i)
-            }
-          }
-          return splitIndexes;
-        }
 
-        break;
-      case 1:
+            if (i == 3) {
+              break;
+            }
+            i++
+            console.log((!win[0] && !split[0]));
+            console.log(!win[0]);
+            console.log(win[0]);
+            console.log(!split[0]);
+          }
+          console.log('split');
+          console.log(split);
+          splitIndexes = []
+          // for (var i = 0; i < split.length; i++) {
+          //   e = 0
+          //   // console.log('i = ' + i);
+          //   for (var j = 1; j < 4; j++) {
+          //     // console.log('j = ' + i);
+          //     if (split[0][j] == sortedbyIthKicker[i][j]) {
+          //       e = 1
+          //     } else {
+          //       e = 0
+          //     }
+          //   }
+          //   if (e) {
+          //     splitIndexes.push(i)
+          //   }
+          // }
+          // return splitIndexes;
+          // console.log(splitIndexes);
+
+        }
 
         break;
       case 2:
@@ -999,12 +1123,21 @@ function getWinner(holeCards, communitycards) {
   }
 }
 
+//mixed rank cards
+// console.log(getWinner([['Kd','Jh'],['Ts','Kh'],['3s', '3d'],['Ad','9s']],['5d','3c','Td','2s','8h']));
+
+
+//hight cards
 // console.log(getWinner([['6c','4h'],['Ts','5h'],['Ad','Jh'],['4d','Th']],['5d','3c','Td','2s','Ah']));
 // console.log(getWinner([['Kd','Jh'],['Js','Kh'],['Ks', 'Ad']],['5d','3c','Td','2s','8h']));
 // console.log(getWinner([['9d','4h'],['Js','Kh'],['Ks', '6d']],['5d','3c','Td','2s','8h'])); //winner
-// console.log(getWinner([['4d','7c'],['6s','Kh'],['Ks', '6d']],['5d','3c','Td','2s','8h'])); // split
+console.log(getWinner([['Kc','4c'],['4d','7c'],['6s','Kh'],['Ks', '6d']],['5d','3c','Td','2s','8h'])); // split
 
-
+//pairs
+// console.log(getWinner([['3s','Kh'],['4d','9s'],['Ks', 'Jh'],['Kd','5h'],['As','9c']],['6d','Th','Td','2s','8h']));
+// console.log(getWinner([['2s','Kh'],['4d','Tc'],['5s', 'Ts'],['Th','5h'],['As','9c']],['6d','3c','Td','2s','8h']));
+// console.log(getWinner([['4d','7c'],['6s','Kh'],['Ks', '6d']],['5d','3c','Td','2s','8h']));
+// console.log(getWinner([['4d','7c'],['6s','Th']],['5d','3c','Td','2s','8h']));
 
 
 function statProof(tries) {
@@ -1096,41 +1229,63 @@ function statProof(tries) {
 // console.log(hasHand());
 
 
+// console.log(hasHand(['Ks', '6d'], ['5d','3c','Td','2s','8h']));
+
 // console.log(hasPair(["Qc", "Ah"], ["Jc", "8d", "9h", "2c", "2s"]));
-// console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
+// console.log(hasHand(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
 // console.log(hasPair(["Qc", "Jh"], ["Jc", "8d", "8h", "8s", "Qs"]));
 //
 // console.log(hasTwoPairs(["Qc", "Jh"], ["Jc", "9d", "9h", "7s", "2s"]));
-// console.log(hasTwoPairs(["Qc", "9d"], ["9h", "Jh", "Jc", "7s", "2s"]));
+// console.log(hasHand(["Qc", "9d"], ["9h", "Jh", "Jc", "7s", "2s"]));
 //
-// console.log(hasThreeOfaKind(["5c", "Jh"], ["4s", "2d", "Kh", "Kd", "Ks"]));
+// console.log(hasHand(["5c", "Jh"], ["4s", "2d", "Kh", "Kd", "Ks"]));
 
 
 // console.log(hasStraight(["2d", "3h"], ["4c", "Td", "7h", "Ad", "5c"]));
 // console.log(hasStraight(["Ks", "Jh"], ["Tc", "2d", "7h", "Ad", "Qc"]));
 
 // console.log(hasStraight(["8s", "9h"], ["Tc", "2d", "7h", "Ad", "6c"]));
-// console.log(hasStraight(["8s", "9h"], ["Tc", "2d", "7h", "2c", "6c"]));
+// console.log(hasHand(["8s", "9h"], ["Tc", "2d", "7h", "2c", "6c"]));
 // console.log(hasStraight(["Qs", "Qh"], ["Tc", "Kh", "7h", "Ah", "Jc"]));
 
 // console.log(hasFlush(["Ts", "9c"], ["3c", "Js", "5s", "2d", "2s"]));
-// console.log(hasFlush(["Th", "9h"], ["3c", "Jh", "5h", "2d", "2h"]));
 // console.log(hasFlush(["Td", "9d"], ["3d", "Jd", "5d", "2c", "2d"]));
+// console.log(hasHand(["Th", "9h"], ["3c", "Jh", "5h", "2d", "2h"]));
 // console.log(hasFlush(["Ts", "9s"], ["3c", "Js", "5s", "2d", "2s"]));
 
 // console.log(hasFullhouse(["8s", "9h"], ["8c", "8d", "7h", "Ah", "5c"]));
-// console.log(hasFullhouse(["Qc", "Jh"], ["Jc", "8d", "8h", "8s", "Qs"]));
+// console.log(hasHand(["Qc", "Jh"], ["Jc", "8d", "8h", "8s", "Qs"]));
 // console.log(hasFullhouse(["8s", "2h"], ["8c", "8d", "7h", "2s", "9c"]));
 
 // console.log(hasFourOfaKind(["8s", "8h"], ["2c", "8d", "Kh", "2s", "8c"]));
 // console.log(hasFourOfaKind(["Js", "Jh"], ["Tc", "Jd", "Kh", "2s", "Jc"]));
-// console.log(hasFourOfaKind(["2s", "2h"], ["Ac", "2d", "Kh", "3s", "2c"]));
-// console.log(hasFourOfaKind(["8s", "8h"], ["2c", "7d", "Kh", "2s", "8c"]));
+// console.log(hasHand(["2s", "2h"], ["Ac", "2d", "Kh", "3s", "2c"]));
+// console.log(hasHand(["8s", "8h"], ["2c", "7d", "Kh", "2s", "8c"]));
 
 // console.log(hasStraightFlush(["Th", "9h"], ["6h", "Ac", "7h", "2s", "8h"]));
 // console.log(hasStraightFlush(["Th", "9h"], ["6s", "Ac", "7h", "2h", "8h"]));
-// console.log(hasStraightFlush(["Th", "4h"], ["3h", "Ah", "7c", "2h", "5h"]));
+// console.log(hasHand(["Th", "4h"], ["3h", "Ah", "7c", "2h", "5h"]));
 // console.log(hasStraightFlush(["Th", "Qh"], ["Jh", "Ah", "7c", "Kh", "5h"]));
+
+
+// console.log(hasHand(['Ks', '6d'], ['5d','3c','Td','2s','8h']));           //hight card
+// console.log(hasHand(["Qc", "Jh"], ["Jc", "8d", "9h", "3s", "2s"]));
+// console.log(hasHand(["Qc", "9d"], ["9h", "Jh", "Jc", "7s", "2s"]));
+// console.log(hasHand(["5c", "Jh"], ["4s", "2d", "Kh", "Kd", "Ks"]));
+// console.log(hasHand(["8s", "9h"], ["Tc", "2d", "7h", "2c", "6c"]));       //...
+// console.log(hasHand(["Th", "9h"], ["3c", "Jh", "5h", "2d", "2h"]));
+// console.log(hasHand(["Qc", "Jh"], ["Jc", "8d", "8h", "8s", "Qs"]));
+// console.log(hasHand(["2s", "2h"], ["Ac", "2d", "Kh", "3s", "2c"]));
+// console.log(hasHand(["Th", "4h"], ["3h", "Ah", "7c", "2h", "5h"]));       // straight flush
+
+
+
+
+
+
+
+
+
 
 // setup()
 // console.log(hasPair(g.table.seats[0].hand, g.table.communitycards));
@@ -1168,4 +1323,5 @@ module.exports = {
   Player,
   Deck,
   hasHand,
+  getWinner
 };

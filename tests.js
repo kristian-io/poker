@@ -1,48 +1,19 @@
 const g = require('./g');
 
-const cardTypes = {
-  highCard: ["Qh", "Ts", "5d", "2h", "8s", "3h", "7d"],
-  pair: ["Qc", "Jh", "Jc", "8d", "9h", "3s", "2s"],
-  twoPairs: ["Ah", "As", "2d", "2h", "5c", "Td", "7d"],
-  threeOfaKind: ["Kd", "Jh", "Ks", "Kh", "2d", "5c", "4s"],
-  straight: ["8s", "9h", "Tc", "2d", "7h", "Ad", "6c"],
-  flush: ["Ts", "9s", "3c", "Js", "5s", "2d", "2s"],
-  fullHouse: ["8s", "2h", "8c", "8d", "7h", "2s", "9c"],
-  fourOfaKind: ["8s", "8h", "Ac", "8d", "Kh", "2s", "8c"],
-  straightFlush: ["Th", "9h", "6h", "Ac", "7h", "2s", "8h"],
-  royalFlush: ["", "", "", "", "", "", ""]
-}
 
 
-// returns array of hand and community cards [hand,communitycards] - this is the format that the hasPair(), hasFlush() .. expect
-function prepare(cardType) {
-  var temp = cardType
-  var tempH = temp.splice(0,2)
-  return [temp,tempH]
-}
-
-for (var type in cardTypes) {
-  if (cardTypes.hasOwnProperty(type)) {
-    prep = prepare(cardTypes[type])
-    // TODO: here I check all the types
-    console.log(type + "              " + g.hasPair(prep[0], prep[1]));
-    console.log(type + "              " + g.hasTwoPairs(prep[0], prep[1]));
-    console.log(type + "              " + g.hasThreeOfaKind(prep[0], prep[1]));
-    console.log(type + "              " + g.hasStraight(prep[0], prep[1]));
-    // console.log(type + "              " + g.hasTreeOfaKind(prep[0], prep[1]));
-
-    // .
-    // .
-    // .
-
-// console.log(g.hasPair(prep[0], prep[1]));
+tests = [
+  {
+    "holeCards": [['7c','4h'],['Qs','8h'],['Ad','Jh']],
+    "communitycards": ['5d','3c','Td','2s','9h'],
+    "expectedWinner": 2,
+    "expectedWinningHand": ['Ad','Jh','Td','9h','5d']
   }
-}
 
 
-//for each cardTypes .... prepare and run the check
-// prep = prepare(cardTypes.highCard)
-// console.log('High card: ' + g.hasPair(prep[0], prep[1]));
-//
-// prep = prepare(cardTypes.pair)
-// console.log('Pair: ' + g.hasPair(prep[0], prep[1]));
+]
+
+
+// console.log(g.getWinner(tests[0].holeCards,tests[0].communitycards));
+// console.log(g.getWinner(tests[0].holeCards,tests[0].communitycards) == tests[0].expectedWinner);
+//this is a boilerplate for unit testing the getWinner function
