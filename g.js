@@ -1312,10 +1312,45 @@ function getWinner(holeCards, communitycards) {
         }
 
 
-        break;
       case 4:
+        //we have a straight
 
-        break;
+        // console.log(equalCategoryHands);
+
+
+        // lets get just the 2d array of hands
+        hands = [] //will still keep the order as equalCategoryHands, meaning hands[i] == equalRankHands[i][2]
+        for (var i = 0; i < equalCategoryHands.length; i++) {
+          hands.push(equalCategoryHands[i][2]);
+        }
+
+        // console.log(hands);
+
+        //this is too simple :) - we just need to sort by 0th element and compare
+        sorted = sortByRankByNthElement(hands, 0)
+
+        // console.log('sorted');
+        // console.log(sorted);
+
+        //if 0th and 1st elements are not the same - we have a winnner
+        if (sorted[0][0][0] != sorted[1][0][0]) {
+          return hasHandResultsSimplified.indexOf(sorted[0])
+        }
+        else {
+          // else we will collect the splitters and return their positions
+          splittes = []
+          for (var i = 0; i < sorted.length; i++) {
+            if (sorted[0][0][0] != sorted[i][0][0]) {
+              splitters.push(sorted[i])
+            }
+          }
+          splittersPosition = []
+          for (var i = 0; i < splitters.length; i++) {
+            splittersPosition.push(hasHandResultsSimplified.indexOf(splitters[i]))
+          }
+          return splittersPosition;
+        }
+
       case 5:
 
         break;
@@ -1358,8 +1393,12 @@ function getWinner(holeCards, communitycards) {
 // console.log(getWinner([['7c','4d'],['Th','2s'],['9d','7s'],['9s','8s']],['Tc','7s','8d','9h','2c']));
 
 // 3 of a kind
-console.log(getWinner([['Ts','5h'],['3h','3c'],['Ks','5s']], ['Js','5c','5d','7s','2d']));
+// console.log(getWinner([['Ts','5h'],['3h','3c'],['Ks','5s']], ['Js','5c','5d','7s','2d']));
 // console.log(getWinner([['6c','6h'],['Jh','Tc'],['3h','3c'],['Jc','Ts']], ['Jd','Jc','5d','7s','2d']));
+
+// straights
+// console.log(getWinner([["Ad", "2d"], ['9d','2s'],['Js','9h']], ["Tc", "8d", "7h", "6d", "5c"]));
+// console.log(getWinner([["2d", "Td"], ['6d','2s'],['Js','2h']], ["4c", "3d", "7h", "Ad", "5c"]));
 
 
 
