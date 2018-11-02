@@ -1212,6 +1212,105 @@ function getWinner(holeCards, communitycards) {
       }
 
       case 3:
+        //we have a three of a kind...
+
+        // console.log(equalCategoryHands);
+        // [ [ 'three of a kind', 3, [ [Array], 'Jd', '8c' ] ],
+        // [ 'three of a kind', 3, [ [Array], '8c', '7s' ] ] ]
+
+        // lets get just the 2d array of hands
+        hands = [] //will still keep the order as equalCategoryHands, meaning hands[i] == equalRankHands[i][2]
+        for (var i = 0; i < equalCategoryHands.length; i++) {
+          hands.push(equalCategoryHands[i][2]);
+        }
+
+        // console.log(hands);
+        // [ [ [ '5c', '5h', '5d' ], 'Jd', '8c' ],
+        //   [ [ 'Jc', 'Js', 'Jd' ], '8c', '7s' ] ]
+
+        //we sort and start comparing by 3 of a kind rank
+        let handsSortedByThreeOfAKindRank = hands.concat(); //copy the array
+        handsSortedByThreeOfAKindRank.sort(function (a, b) {
+            // console.log('a= ', a);
+            // console.log('a[0]= ', a[0]);
+            // console.log('b= ', b);
+            if (rank(a[0][0][0],rankTable) > rank(b[0][0][0],rankTable)) {
+              return 1;
+            }
+            else if (rank(a[0][0][0],rankTable) < rank(b[0][0][0],rankTable)) {
+              return -1;
+            }
+            else {
+              return 0;
+            }
+        })
+
+        // console.log('handsSortedByThreeOfAKindRank');
+        // console.log(handsSortedByThreeOfAKindRank);
+        // [ [ [ 'Jc', 'Js', 'Jd' ], '8c', '7s' ],
+        //   [ [ '5c', '5h', '5d' ], 'Jd', '8c' ] ]
+
+        if (handsSortedByThreeOfAKindRank[0][0][0][0] != handsSortedByThreeOfAKindRank[1][0][0][0]) {
+          //we have a winner
+          return hasHandResultsSimplified.indexOf(handsSortedByThreeOfAKindRank[0])
+        }
+        else {
+          //we will keep just the hands equal by 3 of a kind rank
+          handsSortedByThreeOfAKindRank_temp = []
+          for (var i = 0; i < handsSortedByThreeOfAKindRank.length; i++) {
+            if (handsSortedByThreeOfAKindRank[0][0][0][0] == handsSortedByThreeOfAKindRank[i][0][0][0]) {
+              handsSortedByThreeOfAKindRank_temp.push(handsSortedByThreeOfAKindRank[i])
+            }
+          }
+        }
+        // console.log('handsSortedByThreeOfAKindRank_temp');
+        // console.log(handsSortedByThreeOfAKindRank_temp);
+
+        //we can continue comparing by kickers
+        n = 1;
+        sorted_temp = handsSortedByThreeOfAKindRank_temp.concat()
+        // console.log(sorted_temp);
+
+        while (true) {
+          // console.log('n ====================== ', n);
+          //sort by Nth hand starting from 1
+          sorted = sortByRankByNthElement(sorted_temp, n)
+          // console.log('sorted by n= ', n);
+          // console.log(sorted);
+          //compare first 2 if they are not equal we have a winner
+          if (sorted[0][n][0] != sorted[1][n][0]) {
+            //we have a winner
+            // console.log('we have a winner');
+            return hasHandResultsSimplified.indexOf(sorted[0])
+          }
+          else {
+            //otherwise we will only keep those who are equal based on Nth card
+            sorted_temp = []
+            for (var i = 0; i < sorted.length; i++) {
+              if (sorted[0][n][0] == sorted[i][n][0]) {
+                sorted_temp.push(sorted[i])
+              }
+            }
+            // console.log('sorted after purging...');
+            // console.log(sorted_temp);
+          }
+          //if we are not at the end, continue
+          if (n < sorted_temp[0].length -1) {
+            n++;
+          }
+          else if (n == sorted_temp[0].length -1) {
+            //we arived at the end...
+            //hands that remained in sorted_temp are the splitters!!!
+            // console.log('we have a split');
+            // console.log(sorted_temp);
+            splitters = []
+            for (var i = 0; i < sorted_temp.length; i++) {
+              splitters.push(hasHandResultsSimplified.indexOf(sorted_temp[i]))
+            }
+            return splitters;
+          }
+        }
+
 
         break;
       case 4:
@@ -1254,9 +1353,16 @@ function getWinner(holeCards, communitycards) {
 
 // 2 pairs
 // console.log(getWinner([['8d','2h'],['3s','2h'],['5s', '2s'],['6s','2d'],['8h','6c'],['8c','6h'],['As','9c']],['6d','3c','Td','2c','8s']));
-console.log(getWinner([['Kd','7s'],['7c','4d'],['Kh','5s'],['Jh','3s']],['Tc','Ts','8d','8h','2c']));
+// console.log(getWinner([['Kd','7s'],['7c','4d'],['Kh','5s'],['Jh','3s']],['Tc','Ts','8d','8h','2c']));
 // console.log(getWinner([['7c','4d'],['Th','2s'],['Td','7s'],['9s','8s']],['Tc','7s','8d','9h','2c']));
 // console.log(getWinner([['7c','4d'],['Th','2s'],['9d','7s'],['9s','8s']],['Tc','7s','8d','9h','2c']));
+
+// 3 of a kind
+console.log(getWinner([['Ts','5h'],['3h','3c'],['Ks','5s']], ['Js','5c','5d','7s','2d']));
+// console.log(getWinner([['6c','6h'],['Jh','Tc'],['3h','3c'],['Jc','Ts']], ['Jd','Jc','5d','7s','2d']));
+
+
+
 
 
 function statProof(tries) {
