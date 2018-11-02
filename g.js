@@ -856,6 +856,9 @@ function getWinner(holeCards, communitycards) {
     hasHandResults.push(hasHand(holeCards[i], communitycards))
   }
 
+  console.log('ALL HANDS:');
+  console.log(hasHandResults);
+
   //we will also create a array containing the same order of hands without the description and hand category rank for easier lookup of hands later on
   //!!!!!!!!!!!this array will be used to lookup the winning hand!!!!!!!!!!!!!!!
   hasHandResultsSimplified = hasHandResults.concat();
@@ -974,7 +977,7 @@ function getWinner(holeCards, communitycards) {
       case 1:
         // we have one pair cards
 
-        console.log(equalCategoryHands);
+        // console.log(equalCategoryHands);
         // [ [ 'pair', 1, [ [Array], 'Kh', 'Td', '8h' ] ],
         //   [ 'pair', 1, [ [Array], '8h', '6d', '4d' ] ],
         //   [ 'pair', 1, [ [Array], '8h', '6d', '5s' ] ],
@@ -985,7 +988,7 @@ function getWinner(holeCards, communitycards) {
         for (var i = 0; i < equalCategoryHands.length; i++) {
           hands.push(equalCategoryHands[i][2]);
         }
-        console.log(hands);
+        // console.log(hands);
         // [ [ [ '2s', '2s' ], 'Kh', 'Td', '8h' ],
         //   [ [ 'Tc', 'Td' ], '8h', '6d', '4d' ],
         //   [ [ 'Ts', 'Td' ], '8h', '6d', '5s' ],
@@ -1007,7 +1010,7 @@ function getWinner(holeCards, communitycards) {
               return 0;
             }
         })
-        console.log(handsSortedByPairRank);
+        // console.log(handsSortedByPairRank);
         // [ [ [ 'Tc', 'Td' ], '8h', '6d', '4d' ],
         //   [ [ 'Ts', 'Td' ], '8h', '6d', '5s' ],
         //   [ [ 'Th', 'Td' ], '8h', '6d', '5h' ],
@@ -1077,8 +1080,137 @@ function getWinner(holeCards, communitycards) {
         }
 
       case 2:
+      // we have two pairs hands
 
-        break;
+      // console.log(equalCategoryHands);
+      // [ [ 'two pairs', 2, [ [Array], [Array], 'Td' ] ],
+      // [ 'two pairs', 2, [ [Array], [Array], 'Td' ] ],
+      // [ 'two pairs', 2, [ [Array], [Array], 'Td' ] ],
+      // [ 'two pairs', 2, [ [Array], [Array], 'Td' ] ] ]
+
+      // lets get just the 2d array of hands
+      hands = [] //will still keep the order as equalCategoryHands, meaning hands[i] == equalRankHands[i][2]
+      for (var i = 0; i < equalCategoryHands.length; i++) {
+        hands.push(equalCategoryHands[i][2]);
+      }
+      // console.log(hands);
+      // [ [ [ '3s', '3c' ], [ '2h', '2s' ], 'Td' ],
+      //   [ [ '6s', '6d' ], [ '2d', '2s' ], 'Td' ],
+      //   [ [ '8h', '8h' ], [ '6c', '6d' ], 'Td' ],
+      //   [ [ '8c', '8h' ], [ '6h', '6d' ], 'Td' ] ]
+
+
+      //we first need to decide based on 1st pairs
+      let handsSortedByFirstPairRank = hands.concat(); //copy the array
+      handsSortedByFirstPairRank.sort(function (a, b) {
+          // console.log('a= ', a);
+          // console.log('a[0]= ', a[0]);
+          // console.log('b= ', b);
+          if (rank(a[0][0][0][0],rankTable) > rank(b[0][0][0][0],rankTable)) {
+            return 1;
+          }
+          else if (rank(a[0][0][0][0],rankTable) < rank(b[0][0][0][0],rankTable)) {
+            return -1;
+          }
+          else {
+            return 0;
+          }
+      })
+
+      // console.log('handsSortedByFirstPairRank');
+      // console.log(handsSortedByFirstPairRank);
+
+      //   [ [ [ '8h', '8h' ], [ '6c', '6d' ], 'Td' ],
+      //   [ [ '8c', '8h' ], [ '6h', '6d' ], 'Td' ],
+      //   [ [ '6s', '6d' ], [ '2d', '2s' ], 'Td' ],
+      // [ [ '3s', '3c' ], [ '2h', '2s' ], 'Td' ] ]
+
+      if (handsSortedByFirstPairRank[0][0][0][0] != handsSortedByFirstPairRank[1][0][0][0]) {
+        //we have a winner
+        return hasHandResultsSimplified.indexOf(handsSortedByFirstPairRank[0])
+      }
+      else {
+        //we will keep just the hands equal by the 1st pair
+        handsSortedByFirstPairRank_temp = []
+        for (var i = 0; i < handsSortedByFirstPairRank.length; i++) {
+          if (handsSortedByFirstPairRank[0][0][0][0] == handsSortedByFirstPairRank[i][0][0][0]) {
+            handsSortedByFirstPairRank_temp.push(handsSortedByFirstPairRank[i])
+          }
+        }
+
+        // console.log('handsSortedByFirstPairRank_temp');
+        // console.log(handsSortedByFirstPairRank_temp);
+
+        // now we can compare by the 2nd pair
+        let handsSortedBySecondPairRank = handsSortedByFirstPairRank_temp.concat(); //copy the array
+        handsSortedBySecondPairRank.sort(function (a, b) {
+            // console.log('a= ', a);
+            // console.log('a[1][0][0][0] ', a[1][0][0][0]);
+            // console.log('b= ', b);
+            if (rank(a[1][0][0][0],rankTable) > rank(b[1][0][0][0],rankTable)) {
+              return 1;
+            }
+            else if (rank(a[1][0][0][0],rankTable) < rank(b[1][0][0][0],rankTable)) {
+              return -1;
+            }
+            else {
+              return 0;
+            }
+        })
+
+        // console.log('handsSortedBySecondPairRank');
+        // console.log(handsSortedBySecondPairRank);
+
+        if (handsSortedBySecondPairRank[0][1][0][0] != handsSortedBySecondPairRank[1][1][0][0]) {
+          //we have a winner
+          return hasHandResultsSimplified.indexOf(handsSortedBySecondPairRank[0])
+        }
+        else {
+          //we will keep just the hands equal by the 2nd pair
+          handsSortedBySecondPairRank_temp = []
+          for (var i = 0; i < handsSortedBySecondPairRank.length; i++) {
+            if (handsSortedBySecondPairRank[0][1][0][0] == handsSortedBySecondPairRank[i][1][0][0]) {
+              handsSortedBySecondPairRank_temp.push(handsSortedBySecondPairRank[i])
+            }
+          }
+
+          // console.log('handsSortedBySecondPairRank_temp');
+          // console.log(handsSortedBySecondPairRank_temp);
+
+          //and finally we can compare them by the kickers... uff
+
+          handsToCompareByKickers = handsSortedBySecondPairRank_temp.concat();
+          //we need to sort them by the kickers
+          handsToCompareByKickersSorted = sortByRankByNthElement(handsToCompareByKickers, 2)
+          // console.log(handsToCompareByKickersSorted);
+
+          //if there are any that equal the 1st then we have a split oterwise we have a winner
+          if (handsToCompareByKickersSorted[0][2][0] != handsToCompareByKickersSorted[1][2][0]) {
+            //we have a winner
+            return hasHandResultsSimplified.indexOf(handsToCompareByKickersSorted[0])
+          }
+          else {
+            //we nned to collect all the splittes
+            splitters = []
+            for (var i = 0; i < handsToCompareByKickersSorted.length; i++) {
+              if (handsToCompareByKickersSorted[0][2][0] == handsToCompareByKickersSorted[i][2][0]) {
+                splitters.push(handsToCompareByKickersSorted[i])
+              }
+            }
+
+            // console.log('splitters');
+            // console.log(splitters);
+
+            splittersPosition = []
+            //we just need to return the postion of the splitters
+            for (var i = 0; i < splitters.length; i++) {
+              splittersPosition.push(hasHandResultsSimplified.indexOf(splitters[i]))
+            }
+            return splittersPosition;
+          }
+        }
+      }
+
       case 3:
 
         break;
@@ -1119,6 +1251,12 @@ function getWinner(holeCards, communitycards) {
 // console.log(getWinner([['2s','Kh'],['4d','Tc'],['5s', 'Ts'],['Th','5h'],['As','9c']],['6d','3c','Td','2s','8h']));
 // console.log(getWinner([['4d','7c'],['6s','Kh'],['Ks', '6d']],['5d','3c','Td','2s','8h']));
 // console.log(getWinner([['4d','7c'],['6s','Th']],['5d','3c','Td','2s','8h']));
+
+// 2 pairs
+// console.log(getWinner([['8d','2h'],['3s','2h'],['5s', '2s'],['6s','2d'],['8h','6c'],['8c','6h'],['As','9c']],['6d','3c','Td','2c','8s']));
+console.log(getWinner([['Kd','7s'],['7c','4d'],['Kh','5s'],['Jh','3s']],['Tc','Ts','8d','8h','2c']));
+// console.log(getWinner([['7c','4d'],['Th','2s'],['Td','7s'],['9s','8s']],['Tc','7s','8d','9h','2c']));
+// console.log(getWinner([['7c','4d'],['Th','2s'],['9d','7s'],['9s','8s']],['Tc','7s','8d','9h','2c']));
 
 
 function statProof(tries) {
