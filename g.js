@@ -1352,8 +1352,64 @@ function getWinner(holeCards, communitycards) {
         }
 
       case 5:
+        //we have flush
 
-        break;
+        // console.log(equalCategoryHands);
+
+        // lets get just the 2d array of hands
+        hands = [] //will still keep the order as equalCategoryHands, meaning hands[i] == equalRankHands[i][2]
+        for (var i = 0; i < equalCategoryHands.length; i++) {
+          hands.push(equalCategoryHands[i][2]);
+        }
+        // console.log(hands);
+
+        //we will keep sorting the hands by Nth card and comparing until the winner is found;
+        //if hand looses based on Nth card we will remove it and not consider it in the next comparision
+
+        n = 0;
+        sorted_temp = hands.concat()
+        // console.log(sorted_temp);
+
+        while (true) {
+          // console.log('n ====================== ', n);
+          //sort by Nth hand starting from 0
+          sorted = sortByRankByNthElement(sorted_temp, n)
+          // console.log('sorted by n= ', n);
+          // console.log(sorted);
+          //compare first 2 if they are not equal we have a winner
+          if (sorted[0][n][0] != sorted[1][n][0]) {
+            //we have a winner
+            // console.log('we have a winner');
+            return hasHandResultsSimplified.indexOf(sorted[0])
+          }
+          else {
+            //otherwise we will only keep those who are equal based on Nth card
+            sorted_temp = []
+            for (var i = 0; i < sorted.length; i++) {
+              if (sorted[0][n][0] == sorted[i][n][0]) {
+                sorted_temp.push(sorted[i])
+              }
+            }
+            // console.log('sorted after purging...');
+            // console.log(sorted_temp);
+          }
+          //if we are not at the end, continue
+          if (n < sorted_temp[0].length -1) {
+            n++;
+          }
+          else if (n == sorted_temp[0].length -1) {
+            //we arived at the end...
+            //hands that remained in sorted_temp are the splitters!!!
+            // console.log('we have a split');
+            // console.log(sorted_temp);
+            splitters = []
+            for (var i = 0; i < sorted_temp.length; i++) {
+              splitters.push(hasHandResultsSimplified.indexOf(sorted_temp[i]))
+            }
+            return splitters;
+          }
+        }
+
       case 6:
 
         break;
@@ -1400,7 +1456,9 @@ function getWinner(holeCards, communitycards) {
 // console.log(getWinner([["Ad", "2d"], ['9d','2s'],['Js','9h']], ["Tc", "8d", "7h", "6d", "5c"]));
 // console.log(getWinner([["2d", "Td"], ['6d','2s'],['Js','2h']], ["4c", "3d", "7h", "Ad", "5c"]));
 
-
+//flushes
+// console.log(getWinner([['7d','3d'],['Ac','5d'],['Qd','Td'],['Ad','4d']],['6d','9d','2d','Ts','Jh']));
+// console.log(getWinner([['Jh','2d'],['Ts','4c']],['6d','Jd','5d','7d','3d']));
 
 
 
