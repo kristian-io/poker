@@ -158,12 +158,56 @@ class Deck {
   }
 }
 
-function hasStraightFlush(hand, communitycards) {
+function hasStraightFlush1(hand, communitycards) {
+  // // flush = hasFlush(hand, communitycards);
+  // straight = hasStraight(hand, communitycards);
+  //
+  // // console.log(hand + "," + communitycards);
+  // // console.log(straight);
+  // if (straight) {
+  //   flush = hasFlush([], straight)
+  //   // console.log('------------------> ' + flush);
+  //   if (flush) {
+  //     if (flush[0][0] == "A" && flush[1][0] != "K") {
+  //       //we neeed to move the A at the end of the array
+  //       flush_new = flush.splice(1,5)
+  //       flush_new[4] = flush[0]
+  //       // console.log(flush_new);
+  //       return flush_new;
+  //     }
+  //     else {
+  //       return flush;
+  //     }
+  //   }
+  //   return false
+  // }
+  // return false;
+  flush = hasFlush(hand, communitycards);
+  if (flush) {
+    straight = hasStraight([], flush)
+    if (straight) {
+      if (straight[0][0] == "A" && straight[1][0] != "K") {
+        //we neeed to move the A at the end of the array
+        straight_new = straight.splice(1,5)
+        straight_new[4] = straight[0]
+        // console.log(flush_new);
+        return straight_new;
+      }
+      else {
+        return straight;
+      }
+    }
+    return false;
+  }
+  return false;
+
+}
+
+function hasStraightFlush2(hand, communitycards) {
   // flush = hasFlush(hand, communitycards);
   straight = hasStraight(hand, communitycards);
 
   // console.log(hand + "," + communitycards);
-  // console.log(flush);
   // console.log(straight);
   if (straight) {
     flush = hasFlush([], straight)
@@ -183,7 +227,27 @@ function hasStraightFlush(hand, communitycards) {
     return false
   }
   return false;
+  // flush = hasFlush(hand, communitycards);
+  // if (flush) {
+  //   straight = hasStraight([], flush)
+  //   if (straight) {
+  //     if (straight[0][0] == "A" && straight[1][0] != "K") {
+  //       //we neeed to move the A at the end of the array
+  //       straight_new = straight.splice(1,5)
+  //       straight_new[4] = straight[0]
+  //       // console.log(flush_new);
+  //       return straight_new;
+  //     }
+  //     else {
+  //       return straight;
+  //     }
+  //   }
+  //   return false;
+  // }
+  // return false;
+
 }
+
 
 function hasFourOfaKind(hand, communitycards) {
   rankTable = [
@@ -720,8 +784,17 @@ function hasHand(hand, communitycards) {
   // console.log('------------------------------------------');
   // console.log(hand + ',' + communitycards);
   //we start evaluating from the top rankings...
-  if (h = hasStraightFlush(hand,communitycards)) {
+
+  // h = hasStraightFlush1(hand,communitycards)
+  // console.log('h: ' + h);
+  // h2 = hasStraightFlush2(hand,communitycards)
+  // console.log('h2: ' + h);
+
+  if (h = hasStraightFlush1(hand,communitycards)) {
     return ['straight flush',8,h];
+  }
+  else if (h2 = hasStraightFlush2(hand,communitycards)) {
+      return ['straight flush',8,h2];
   }
   else if (h = hasFourOfaKind(hand, communitycards)) {
     return ['four of a kind',7,h];
@@ -1619,7 +1692,9 @@ function getWinner(holeCards, communitycards) {
 // console.log(getWinner([['Jd','Kd'],['Ac','Js']],['Ad','Qd','Jh','Td','2d']));
 // console.log(getWinner([['7c','2s'],['8h','Js']],['Ad','Qd','Kd','Td','Jd']));
 
-console.log(hasHand(['Jd','Kd'],['Ad','Qd','Jh','Td','2d']));
+// console.log(hasHand(['Jd','Kd'],['Ad','Qd','Jh','Td','2d']));
+// console.log(hasStraightFlush2(['Jd','Kd'],['Ad','Qd','Jh','Td','2d']));
+// console.log(hasFlush(['Jd','Kd'],['Ad','Qd','Jh','Td','2d']));
 
 
 
@@ -1745,10 +1820,10 @@ function statProof(tries) {
 // console.log(hasHand(["2s", "2h"], ["Ac", "2d", "Kh", "3s", "2c"]));
 // console.log(hasHand(["8s", "8h"], ["2c", "7d", "Kh", "2s", "8c"]));
 
-// console.log(hasStraightFlush(["Th", "9h"], ["6h", "Ac", "7h", "2s", "8h"]));
-// console.log(hasStraightFlush(["Th", "9h"], ["6s", "Ac", "7h", "2h", "8h"]));
-// console.log(hasHand(["Th", "4h"], ["3h", "Ah", "7c", "2h", "5h"]));
-// console.log(hasStraightFlush(["Th", "Qh"], ["Jh", "Ah", "7c", "Kh", "5h"]));
+// console.log(hasStraightFlush2(["Th", "9h"], ["6h", "Ac", "7h", "2s", "8h"]));
+// console.log(hasStraightFlush2(["Th", "9h"], ["6s", "Ac", "7h", "2h", "8h"]));
+// console.log(hasStraightFlush2(["Th", "4h"], ["3h", "Ah", "7c", "2h", "5h"]));
+// console.log(hasStraightFlush2(["Th", "Qh"], ["Jh", "Ah", "7c", "Kh", "5h"]));
 
 
 // console.log(hasHand(['Ks', '6d'], ['5d','3c','Td','2s','8h']));           //hight card
