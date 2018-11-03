@@ -1338,17 +1338,13 @@ function getWinner(holeCards, communitycards) {
         }
         else {
           // else we will collect the splitters and return their positions
-          splittes = []
+          splitters = []
           for (var i = 0; i < sorted.length; i++) {
-            if (sorted[0][0][0] != sorted[i][0][0]) {
-              splitters.push(sorted[i])
+            if (sorted[0][0][0] == sorted[i][0][0]) {
+              splitters.push(hasHandResultsSimplified.indexOf(sorted[i]))
             }
           }
-          splittersPosition = []
-          for (var i = 0; i < splitters.length; i++) {
-            splittersPosition.push(hasHandResultsSimplified.indexOf(splitters[i]))
-          }
-          return splittersPosition;
+          return splitters;
         }
 
       case 5:
@@ -1411,8 +1407,76 @@ function getWinner(holeCards, communitycards) {
         }
 
       case 6:
+       //we have a full house
 
-        break;
+       // console.log(equalCategoryHands);
+
+
+       // lets get just the 2d array of hands
+       hands = [] //will still keep the order as equalCategoryHands, meaning hands[i] == equalRankHands[i][2]
+       for (var i = 0; i < equalCategoryHands.length; i++) {
+         hands.push(equalCategoryHands[i][2]);
+       }
+
+       console.log(hands);
+
+       //we sort and start comparing by 3 of a kind rank
+       let handsSortedByFullHouseRank = [];
+       handsSortedByFullHouseRank = hands.concat(); //copy the array
+       handsSortedByFullHouseRank.sort(function (a, b) {
+           // console.log('a= ', a);
+           // console.log('a[0]= ', a[0]);
+           // console.log('b= ', b);
+           if (rank(a[0][0][0],rankTable) > rank(b[0][0][0],rankTable)) {
+             return 1;
+           }
+           else if (rank(a[0][0][0],rankTable) < rank(b[0][0][0],rankTable)) {
+             return -1;
+           }
+           else {
+             return 0;
+           }
+       })
+
+       console.log('handsSortedByFullHouseRank');
+       console.log(handsSortedByFullHouseRank);
+       // [ [ [ '7s', '7d', '7h' ], [ 'Tc', 'Ts' ] ],
+       // [ [ '7c', '7d', '7h' ], [ 'Th', 'Ts' ] ] ]
+
+       if (handsSortedByFullHouseRank[0][0][0][0] != handsSortedByFullHouseRank[1][0][0][0]) {
+         //we have a winner
+         return hasHandResultsSimplified.indexOf(handsSortedByFullHouseRank[0])
+       }
+       else {
+         //we will keep just the hands equal by 3 of a kind rank
+         handsSortedByFullHouseRank_temp = []
+         for (var i = 0; i < handsSortedByFullHouseRank.length; i++) {
+           if (handsSortedByFullHouseRank[0][0][0][0] == handsSortedByFullHouseRank[i][0][0][0]) {
+             handsSortedByFullHouseRank_temp.push(handsSortedByFullHouseRank[i])
+           }
+         }
+         console.log('handsSortedByFullHouseRank_temp');
+         console.log(handsSortedByFullHouseRank_temp);
+
+         //now we compare by the the pair
+         if (handsSortedByFullHouseRank_temp[0][1][0][0] != handsSortedByFullHouseRank_temp[1][1][0][0]) {
+           //we have a winnner
+           return hasHandResultsSimplified.indexOf(handsSortedByFullHouseRank_temp[0]);
+         }
+         else {
+           //all the remaining cards are splitters
+           splitters = []
+           for (var i = 0; i < handsSortedByFullHouseRank_temp.length; i++) {
+             if (handsSortedByFullHouseRank_temp[i][1][0][0] == handsSortedByFullHouseRank_temp[0][1][0][0]) {
+               splitters.push(hasHandResultsSimplified.indexOf(handsSortedByFullHouseRank_temp[i]))
+             }
+           }
+           return splitters;
+         }
+       }
+
+
+
       case 7:
 
         break;
@@ -1455,12 +1519,16 @@ function getWinner(holeCards, communitycards) {
 // straights
 // console.log(getWinner([["Ad", "2d"], ['9d','2s'],['Js','9h']], ["Tc", "8d", "7h", "6d", "5c"]));
 // console.log(getWinner([["2d", "Td"], ['6d','2s'],['Js','2h']], ["4c", "3d", "7h", "Ad", "5c"]));
+// console.log(getWinner([["2d", "Td"], ['6d','2s'],['6h','2h']], ["4c", "3d", "7h", "Ad", "5c"]));
 
 //flushes
 // console.log(getWinner([['7d','3d'],['Ac','5d'],['Qd','Td'],['Ad','4d']],['6d','9d','2d','Ts','Jh']));
 // console.log(getWinner([['Jh','2d'],['Ts','4c']],['6d','Jd','5d','7d','3d']));
 
 
+//full houses
+// console.log(getWinner([['7s','Tc'],['7c','Th']],['7d','7h','Ts','Ks','2d']));
+// console.log(getWinner([['2s','2c'],['7c','7h'],['8c','8s']],['7d','8h','Ts','Ts','2d']));
 
 function statProof(tries) {
   //statistical proof of correct rankings
