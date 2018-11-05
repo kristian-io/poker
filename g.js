@@ -1,23 +1,43 @@
 const startingstack = 500;
-const sb = 10;
-const bb = 20;
+const smallBlind = 10;
+const bigBlind = 20;
+
+// gameOptions =
+//   {
+//     startingStack :  500,
+//     smallBlind : 25,
+//     bigBlind : 50,
+//     maxSeats : 3
+// };
+
+
+
 
 // GAME CLASS
 class Game {
-  constructor() {
-    this.startingstack = startingstack;
-    this.sb = sb;
-    this.bb = bb
-    this.table = new Table();
+  constructor(options) {
+    this.startingstack = options.startingStack;
+    this.sb = options.smallBlind;
+    this.bb = options.bigBlind;
+    this.maxSeats = options.maxSeats;
+    this.table = [new Table(options.smallBlind, options.bigBlind, options.startingStack, options.maxSeats)];
+  }
+  createTable() {
+    // TODO: create new table - in the this.table array
   }
 }
 
 // TABLE CLASS
 class Table {
-  constructor() {
-    this.dealer = 0
+  constructor(smallBlind, bigBlind, startingStack, maxSeats) {
     this.communitycards = []
-    this.seats = []
+    this.smallBlind = smallBlind
+    this.bigBlind = bigBlind
+    this.seats = []               //clock wise order will be managed by increasing the table[i] position
+    this.maxSeats = maxSeats
+    this.button = Math.floor(Math.random() * Math.floor(maxSeats))
+    console.log(this.button);
+    this.startingStack = startingStack
     this.deck = new Deck();
   }
 
@@ -25,18 +45,97 @@ class Table {
     this.deck = new Deck();
   }
 
+  newRound() {
+    this.moveButton()
+    this.postBlinds()
+    this.resetDeck()
+    this.dealCards()
+    //...
+  }
+
+  makeBet(amount, playerPosition) {
+    let player = this.seats[playerPosition]
+    // console.log(`${player.id} makes a bet: ${amount}`);
+    player.bet = amount
+    player.stack -= amount // we need to check here if its even possible...
+  }
+
+
+  postBlinds() {
+    //small blind
+    let i = this.button
+    while (!this.seats[i + 1]) {
+      if(i + 1 == this.maxSeats) {
+        i = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
+      }
+      else {
+        i++
+      }
+    }
+    i++
+    console.log('small blind should be player at postion: ' + i);
+    this.makeBet(this.smallBlind, i)
+    //big blind
+    while (!this.seats[i + 1]) {
+      if(i + 1 == this.maxSeats) {
+        i = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
+      }
+      else {
+        i++
+      }
+    }
+    i++
+    console.log('big blind should be player at postion: ' + i);
+    this.makeBet(this.bigBlind, i)
+  }
+
+  moveButton() {
+    //moves button to the next valid position - its important to call this at the beggining of new round
+    //for newly initiated tables initial button position is random and could be on a position where there is no players
+    //calling this function fixes - moves the button from random position to next valid. (so the action is still random)
+    if (this.button + 1 == this.maxSeats) {
+      this.button = 0;
+    }
+    else {
+      if (this.seats[this.button + 1]) {
+        this.button++
+      }
+      else {
+        this.button++
+        this.moveButton()
+      }
+    }
+  }
+
   seatPlayer(player, position) {
-    // this.seats.push(player);
+    //seats player in postion if its available, otherwise starts looking at positons from 0 and seats him on the first available...
+    //returns the position player was seated in.
     if (this.seats[position]) {
       throw new Error(`Position ${position} is already taken`);
-    } else {
-      this.seats[position] = player
+    }
+    else if (!position){
+      //find next empty position
+      for (var i = 0; i < this.maxSeats; i++) {
+        if (!this.seats[i]) {
+          this.seats[i] = new Player(this.startingStack)
+          return i;
+        }
+      }
+    }
+    else if (position > this.maxSeats -1) {
+      throw new Error(`Maximum seats allowed in the game is ${this.maxSeats}`)
+    }
+    else {
+      this.seats[position] = new Player(this.startingStack)
+      return position;
     }
   }
 
   dealCards() {
     for (var i = 0; i < this.seats.length; i++) {
-      this.seats[i].hand = this.deck.deal(2);
+      if (this.seats[i]) {
+        this.seats[i].hand = this.deck.deal(2);
+      }
     }
   }
 
@@ -60,9 +159,12 @@ class Table {
 
 //PLAYER CLASS
 class Player {
-  constructor() {
-    this.stack = 1000
+
+  constructor(stack, id = getUUID() ) {
+    this.id = id
+    this.stack = stack
     this.hand = []
+    this.bet = null
   }
 
 }
@@ -157,6 +259,8 @@ class Deck {
     return results;
   }
 }
+
+function getUUID(a,b){for(b=a='';a++<36;b+=a*51&52?(a^15?8^Math.random()*(a^20?16:4):4).toString(16):'-');return b}
 
 function hasStraightFlush1(hand, communitycards) {
   // // flush = hasFlush(hand, communitycards);
@@ -1643,6 +1747,11 @@ function getWinner(holeCards, communitycards) {
     }
   }
 }
+
+
+
+
+
 
 //mixed rank cards
 // console.log(getWinner([['Kd','Jh'],['Ts','Kh'],['3s', '3d'],['Ad','9s']],['5d','3c','Td','2s','8h']));
