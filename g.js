@@ -30,15 +30,32 @@ class Game {
 // TABLE CLASS
 class Table {
   constructor(smallBlind, bigBlind, startingStack, maxSeats) {
+    this.deck = new Deck();
     this.communitycards = []
     this.smallBlind = smallBlind
     this.bigBlind = bigBlind
     this.seats = []               //clock wise order will be managed by increasing the table[i] position
     this.maxSeats = maxSeats
     this.button = Math.floor(Math.random() * Math.floor(maxSeats))
-    console.log(this.button);
+    // console.log(this.button);
     this.startingStack = startingStack
-    this.deck = new Deck();
+    this.smallBlindPosition = null
+    this.bigBlindPosition = null
+    this.headsUp = null
+    this.numPlayer = null
+  }
+
+  numberOfPlayers() {
+    //returns the number of playes on the table
+    var count = 0
+    for (var i = 0; i < this.seats.length; i++) {
+      if (this.seats[i]) {
+        count ++
+      }
+    }
+    // console.log('number of playes: ' + count);
+    this.numPlayer = count;
+    return count;
   }
 
   resetDeck() {
@@ -46,6 +63,12 @@ class Table {
   }
 
   newRound() {
+    if (this.numberOfPlayers() == 2) {
+      this.headsUp = true
+    }
+    else {
+      this.headsUp = false
+    }
     this.moveButton()
     this.postBlinds()
     this.resetDeck()
@@ -62,40 +85,80 @@ class Table {
 
 
   postBlinds() {
-    //small blind
-    let i = this.button
-    while (!this.seats[i + 1]) {
-      if(i + 1 == this.maxSeats) {
-        i = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
+    if (this.numberOfPlayers() > 2) {
+      // console.log('we are NOT headsUP');
+      //small blind
+      let i = this.button
+      while (!this.seats[i + 1]) {
+        if(i + 1 == this.maxSeats) {
+          i = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
+        }
+        else {
+          i++
+        }
       }
-      else {
-        i++
+      i++
+      // console.log('small blind should be player at postion: ' + i);
+      this.smallBlindPosition = i
+      this.makeBet(this.smallBlind, this.smallBlindPosition)
+      //big blind
+      while (!this.seats[i + 1]) {
+        if(i + 1 == this.maxSeats) {
+          i = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
+        }
+        else {
+          i++
+        }
       }
+      i++
+      // console.log('big blind should be player at postion: ' + i);
+      this.bigBlindPosition = i
+      this.makeBet(this.bigBlind, this.bigBlindPosition)
     }
-    i++
-    console.log('small blind should be player at postion: ' + i);
-    this.makeBet(this.smallBlind, i)
-    //big blind
-    while (!this.seats[i + 1]) {
-      if(i + 1 == this.maxSeats) {
-        i = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
+    else {
+      // console.log('we are headsUP');
+      // console.log('this.button: ' + this.button );
+      //small blind is simply the player on button
+      // console.log('small blind should be player at postion: ' + this.button);
+      this.smallBlindPosition = this.button;
+      this.makeBet(this.smallBlind, this.smallBlindPosition)
+
+      //big blind
+      let i = this.button
+      while (!this.seats[i + 1]) {
+        if(i + 1 == this.maxSeats) {
+          i = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
+        }
+        else {
+          i++
+        }
       }
-      else {
-        i++
-      }
+      i++
+      // console.log('big blind should be player at postion: ' + i);
+      this.bigBlindPosition = i;
+      this.makeBet(this.smallBlind, this.smallBlindPosition)
     }
-    i++
-    console.log('big blind should be player at postion: ' + i);
-    this.makeBet(this.bigBlind, i)
   }
 
   moveButton() {
+    // console.log('moving button from: ' + this.button);
     //moves button to the next valid position - its important to call this at the beggining of new round
     //for newly initiated tables initial button position is random and could be on a position where there is no players
     //calling this function fixes - moves the button from random position to next valid. (so the action is still random)
-    if (this.button + 1 == this.maxSeats) {
-      this.button = 0;
+    if (this.seats[this.button]) {
+      //no need to move...
     }
+    //if we reach the end of array... check if 0 is valid place for button, otherwise set it to 0 and continue...
+    else if (this.button + 1 == this.maxSeats) {
+      if (this.seats[0]) {
+        this.button = 0;
+      }
+      else{
+        this.button = 0;
+        this.moveButton()
+      }
+    }
+    //otherwise chech if the next place is a valid seat, if it is we have a button
     else {
       if (this.seats[this.button + 1]) {
         this.button++
@@ -1033,8 +1096,8 @@ function getWinner(holeCards, communitycards) {
     hasHandResults.push(hasHand(holeCards[i], communitycards))
   }
 
-  console.log('ALL HANDS:');
-  console.log(hasHandResults);
+  // console.log('ALL HANDS:');
+  // console.log(hasHandResults);
 
   //we will also create a array containing the same order of hands without the description and hand category rank for easier lookup of hands later on
   //!!!!!!!!!!!this array will be used to lookup the winning hand!!!!!!!!!!!!!!!

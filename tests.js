@@ -15,5 +15,8 @@ tests = [
 
 
 // console.log(g.getWinner(tests[0].holeCards,tests[0].communitycards));
-// console.log(g.getWinner(tests[0].holeCards,tests[0].communitycards) == tests[0].expectedWinner);
+result = g.getWinner(tests[0].holeCards,tests[0].communitycards) == tests[0].expectedWinner
+if (!result) {
+  console.log(`Exception: Holecards: ${}`);
+};
 //this is a boilerplate for unit testing the getWinner function
