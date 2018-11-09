@@ -5,7 +5,7 @@ options =
     startingStack :  500,
     smallBlind : 25,
     bigBlind : 50,
-    maxSeats : 5
+    maxSeats : 2
 };
 // console.log(options);
 
@@ -17,9 +17,16 @@ table = g.table[0];
 
 
 //seat players
-console.log(table.seatPlayer(new poker.Player(),1));
-console.log(table.seatPlayer(new poker.Player(),3));
-console.log(table.seatPlayer(new poker.Player(),4));
+console.log(table.seatPlayer(new poker.Player()));
+console.log(table.seatPlayer(new poker.Player()));
+// console.log(table.seatPlayer(new poker.Player()));
+// console.log(table.seatPlayer(new poker.Player()));
+// console.log(table.seatPlayer(new poker.Player()));
+// console.log(table.seatPlayer(new poker.Player()));
+// console.log(table.seatPlayer(new poker.Player()));
+// console.log(table.seatPlayer(new poker.Player()));
+// console.log(table.seatPlayer(new poker.Player()));
+// console.log(table.seatPlayer(new poker.Player(),4));
 
 
 //deal hole cards
@@ -31,11 +38,3 @@ console.log(table.seatPlayer(new poker.Player(),4));
 
 table.newRound();
 console.log(table);
-
-console.log(table.button);
-console.log(table.smallBlindPosition);
-console.log(table.bigBlindPosition);
-// console.log(table.seats.length);
-
-//show table
-// console.log(table);

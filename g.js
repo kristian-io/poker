@@ -43,6 +43,7 @@ class Table {
     this.bigBlindPosition = null
     this.headsUp = null
     this.numPlayer = null
+    this.stage = 0 //stages: 0 - preflop | 1 - flop | 2 - turn | 3 - river
   }
 
   numberOfPlayers() {
@@ -74,69 +75,73 @@ class Table {
     this.resetDeck()
     this.dealCards()
     //...
+    //this.bettingRound(0) //0 - preflop
+      //this.playerToAct(0) -> action -> update the state(table)
+      //this.playerToAct(1) -> action -> update the state(table)
+      //repeat until all actions for the betting round are completed...
+  }
+
+  playerToAct(player) {
+    //takes the player position; provides player a game state from players perspective and player makes an action
+    var state = getStateFromPlayerPerspective(player)
+
+    // AI goes here :) :)
+    // var action = AI(state)
+
+    //for now we will manually decide on the action
+    //instead of AI(state) we will use another interface HUMAN(state)
+    // var action = HUMAN(state)
+
+    performAction(player, action)
   }
 
   makeBet(amount, playerPosition) {
     let player = this.seats[playerPosition]
     // console.log(`${player.id} makes a bet: ${amount}`);
+
+    // TODO:  we need to check here if its a valid bet/raise....!!!
+    // TODO: if the amount is > than players stack => bet should be the stack amount and stack = 0; 
     player.bet = amount
     player.stack -= amount // we need to check here if its even possible...
   }
 
+  findNextPlayer(position) {
+    //this function returns a position of a next player based on position
+    //usefull for tables where not all players are sitting next to each other (e.g. table  with 4 playes with empty seats between them )
+    while (!this.seats[position + 1]) {
+      if(position + 1 == this.maxSeats) {
+        position = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
+      }
+      else {
+        position++
+      }
+    }
+    position++
+    return position;
+  }
 
   postBlinds() {
-    if (this.numberOfPlayers() > 2) {
+    if (!this.headsUp) {
       // console.log('we are NOT headsUP');
+
       //small blind
-      let i = this.button
-      while (!this.seats[i + 1]) {
-        if(i + 1 == this.maxSeats) {
-          i = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
-        }
-        else {
-          i++
-        }
-      }
-      i++
-      // console.log('small blind should be player at postion: ' + i);
-      this.smallBlindPosition = i
+      this.smallBlindPosition = findNextPlayer(this.button)
       this.makeBet(this.smallBlind, this.smallBlindPosition)
       //big blind
-      while (!this.seats[i + 1]) {
-        if(i + 1 == this.maxSeats) {
-          i = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
-        }
-        else {
-          i++
-        }
-      }
-      i++
-      // console.log('big blind should be player at postion: ' + i);
-      this.bigBlindPosition = i
+      this.bigBlindPosition = this.findNextPlayer(this.smallBlind)
       this.makeBet(this.bigBlind, this.bigBlindPosition)
     }
     else {
       // console.log('we are headsUP');
       // console.log('this.button: ' + this.button );
-      //small blind is simply the player on button
+      // small blind is simply the player on button
       // console.log('small blind should be player at postion: ' + this.button);
       this.smallBlindPosition = this.button;
       this.makeBet(this.smallBlind, this.smallBlindPosition)
 
       //big blind
-      let i = this.button
-      while (!this.seats[i + 1]) {
-        if(i + 1 == this.maxSeats) {
-          i = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
-        }
-        else {
-          i++
-        }
-      }
-      i++
-      // console.log('big blind should be player at postion: ' + i);
-      this.bigBlindPosition = i;
-      this.makeBet(this.smallBlind, this.smallBlindPosition)
+      this.bigBlindPosition = this.findNextPlayer(this.smallBlindPosition)
+      this.makeBet(this.bigBlind, this.bigBlindPosition)
     }
   }
 
