@@ -95,12 +95,52 @@ class Table {
     performAction(player, action)
   }
 
+
+
+  getStateFromPlayerPerspective(player) {
+    //function return the Table object representing the state of the game based on the {player} perspective
+    //e.g. that it shows all the fundamental info that the real player would know
+    //removing the other players hands and deck among other things
+
+    function copyObjectSkipProperties(object, properties) {
+      // copies an object without properties listed in properties array
+      var copyOfObject = {}
+      for (var prop in object) {
+        if (object.hasOwnProperty(prop)) {
+          if (!properties.includes(prop)) {
+            copyOfObject[prop] = object[prop]
+          }
+        }
+      }
+      return copyOfObject;
+    }
+
+    //we need to remove hand information re other players
+    var seats_new = []
+    for (var i = 0; i < this.seats.length; i++) {
+      if (i == player) {
+        seats_new.push(this.seats[i])
+      }
+      else {
+        seats_new.push(copyObjectSkipProperties(this.seats[i], ['hand']))
+      }
+    }
+
+    // console.log('seats_new');
+    // console.log(seats_new);
+
+    //removing the duplicate properties and deck from the table object
+    var tableFromPlayerPerspective = copyObjectSkipProperties(this, ['deck', 'seats', 'maxSeats', 'headsUp'])
+    tableFromPlayerPerspective['seats'] = seats_new;
+    return tableFromPlayerPerspective
+  }
+
   makeBet(amount, playerPosition) {
     let player = this.seats[playerPosition]
     // console.log(`${player.id} makes a bet: ${amount}`);
 
     // TODO:  we need to check here if its a valid bet/raise....!!!
-    // TODO: if the amount is > than players stack => bet should be the stack amount and stack = 0; 
+    // TODO: if the amount is > than players stack => bet should be the stack amount and stack = 0;
     player.bet = amount
     player.stack -= amount // we need to check here if its even possible...
   }
@@ -108,15 +148,22 @@ class Table {
   findNextPlayer(position) {
     //this function returns a position of a next player based on position
     //usefull for tables where not all players are sitting next to each other (e.g. table  with 4 playes with empty seats between them )
+    // console.log('finding next position from: ' + position);
     while (!this.seats[position + 1]) {
-      if(position + 1 == this.maxSeats) {
+      // console.log('start of while loop: ' + position);
+      if(position + 1 >= this.maxSeats) {
         position = -1; //we will be checking the NEXT (i + 1) position, therefor we set i = -1 so that we will start at -1 + 1 == 0
       }
       else {
+        if (position + 1 >= this.maxSeats) {
+          position = -1;
+        }
         position++
+        // console.log(position);
       }
     }
     position++
+    // console.log('its ' + position);
     return position;
   }
 
@@ -125,10 +172,11 @@ class Table {
       // console.log('we are NOT headsUP');
 
       //small blind
-      this.smallBlindPosition = findNextPlayer(this.button)
+      this.smallBlindPosition = this.findNextPlayer(this.button)
       this.makeBet(this.smallBlind, this.smallBlindPosition)
+
       //big blind
-      this.bigBlindPosition = this.findNextPlayer(this.smallBlind)
+      this.bigBlindPosition = this.findNextPlayer(this.smallBlindPosition)
       this.makeBet(this.bigBlind, this.bigBlindPosition)
     }
     else {
@@ -1872,6 +1920,8 @@ function getWinner(holeCards, communitycards) {
 // console.log(hasHand(['Jd','Kd'],['Ad','Qd','Jh','Td','2d']));
 // console.log(hasStraightFlush2(['Jd','Kd'],['Ad','Qd','Jh','Td','2d']));
 // console.log(hasFlush(['Jd','Kd'],['Ad','Qd','Jh','Td','2d']));
+
+
 
 
 
