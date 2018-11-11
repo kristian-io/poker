@@ -1,3 +1,8 @@
+const readlineSync = require('readline-sync');
+
+
+
+
 const startingstack = 500;
 const smallBlind = 10;
 const bigBlind = 20;
@@ -75,30 +80,57 @@ class Table {
     this.resetDeck()
     this.dealCards()
     //...
-    //this.bettingRound(0) //0 - preflop
+    this.bettingRound(0) //0 - preflop
       //this.playerToAct(0) -> action -> update the state(table)
       //this.playerToAct(1) -> action -> update the state(table)
       //repeat until all actions for the betting round are completed...
   }
 
+  bettingRound(round) {
+    switch (round) {
+      case 0:
+        //pre flop
+        var nextToAct = this.bigBlindPosition
+        for (var i = 0; i < this.maxSeats; i++) {
+          nextToAct = this.findNextPlayer(nextToAct)
+          this.playerToAct(nextToAct)
+        }
+        break;
+
+
+    }
+  }
+
   playerToAct(player) {
     //takes the player position; provides player a game state from players perspective and player makes an action
-    var state = getStateFromPlayerPerspective(player)
-
+    var state = this.getStateFromPlayerPerspective(player)
+    console.log('========================================================');
+    console.log('PLAYER TO ACT: ', player);
     // AI goes here :) :)
     // var action = AI(state)
 
     //for now we will manually decide on the action
     //instead of AI(state) we will use another interface HUMAN(state)
-    // var action = HUMAN(state)
+    var action = this.HUMAN(state)
 
-    performAction(player, action)
+    this.performAction(player, action)
   }
 
+  HUMAN(state) {
+    // human cmd interface for playing the game
+    console.log('STATE');
+    console.log(state);
+    options = ['All In / Call', 'Fold']
+    var index = readlineSync.keyInSelect(options, 'Your action?');
+    return options[index]
+  }
 
+  performAction(player, action) {
+    console.log('player: ' + player + ' wants to perform action: ' + action);
+  }
 
   getStateFromPlayerPerspective(player) {
-    //function return the Table object representing the state of the game based on the {player} perspective
+    //function return the Table object representing the state of the game based on the {player}(its a position of a player in table.seats array) perspective
     //e.g. that it shows all the fundamental info that the real player would know
     //removing the other players hands and deck among other things
 
@@ -129,7 +161,7 @@ class Table {
     // console.log('seats_new');
     // console.log(seats_new);
 
-    //removing the duplicate properties and deck from the table object
+    //removing the duplicate properties, deck and seats (we have prepared seats_new array for this) from the table object
     var tableFromPlayerPerspective = copyObjectSkipProperties(this, ['deck', 'seats', 'maxSeats', 'headsUp'])
     tableFromPlayerPerspective['seats'] = seats_new;
     return tableFromPlayerPerspective

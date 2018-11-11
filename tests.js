@@ -13,10 +13,23 @@ tests = [
 
 ]
 
+//
+// // console.log(g.getWinner(tests[0].holeCards,tests[0].communitycards));
+// result = g.getWinner(tests[0].holeCards,tests[0].communitycards) == tests[0].expectedWinner
+// if (!result) {
+//   console.log(`Exception: Holecards: ${}`);
+// };
+// //this is a boilerplate for unit testing the getWinner function
 
-// console.log(g.getWinner(tests[0].holeCards,tests[0].communitycards));
-result = g.getWinner(tests[0].holeCards,tests[0].communitycards) == tests[0].expectedWinner
-if (!result) {
-  console.log(`Exception: Holecards: ${}`);
-};
-//this is a boilerplate for unit testing the getWinner function
+const readlineSync = require('readline-sync');
+
+
+function ask() {
+  var userName = readlineSync.question('May I have your name? ');
+  console.log('Hi ' + userName + '!');
+}
+
+
+for (var i = 0; i < 15; i++) {
+  ask()
+}
