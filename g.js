@@ -3,9 +3,9 @@ const readlineSync = require('readline-sync');
 
 
 
-const startingstack = 500;
-const smallBlind = 10;
-const bigBlind = 20;
+// const startingstack = 500;
+// const smallBlind = 10;
+// const bigBlind = 20;
 
 // gameOptions =
 //   {
@@ -39,16 +39,23 @@ class Table {
     this.communitycards = []
     this.smallBlind = smallBlind
     this.bigBlind = bigBlind
+    console.log('--------------------------> big blind initiated: ' + this.bigBlind);
     this.seats = []               //clock wise order will be managed by increasing the table[i] position
     this.maxSeats = maxSeats
-    this.button = Math.floor(Math.random() * Math.floor(maxSeats))
-    // console.log(this.button);
+    this.button = Math.floor(Math.random() * Math.floor(this.maxSeats))
+    console.log('--------------------------> button initiated: ' + this.button);
     this.startingStack = startingStack
     this.smallBlindPosition = null
     this.bigBlindPosition = null
     this.headsUp = null
     this.numPlayer = null
     this.stage = 0 //stages: 0 - preflop | 1 - flop | 2 - turn | 3 - river
+    this.pot = 0
+    this.lastPlayerToAct = null
+  }
+
+  clearPot() {
+    this.pot = 0;
   }
 
   numberOfPlayers() {
@@ -68,68 +75,273 @@ class Table {
     this.deck = new Deck();
   }
 
+  isWinner() {
+    for (var i = 0; i < this.seats.length; i++) {
+      if (this.seats[0].stack + this.seats[0].bet <= 0) {
+        //player 0 lost
+        return 1
+      }
+      else if (this.seats[1].stack + this.seats[1].bet <= 0) {
+        // player 1 lost
+        return 0
+      }
+      else {
+        return -1
+      }
+    }
+
+  }
+
   newRound() {
+    console.log('###################################################');
+    console.log('###################################################');
+    console.log('###################################################');
+    console.log('NEW ROUND');
     if (this.numberOfPlayers() == 2) {
       this.headsUp = true
     }
     else {
       this.headsUp = false
     }
+    this.clearPot()
+    this.clearBets()
+    this.clearLastActions()
+    this.clearCommunityCards()
     this.moveButton()
     this.postBlinds()
     this.resetDeck()
     this.dealCards()
     //...
-    this.bettingRound(0) //0 - preflop
+    var r = this.bettingRound(0) //0 - preflop
       //this.playerToAct(0) -> action -> update the state(table)
       //this.playerToAct(1) -> action -> update the state(table)
       //repeat until all actions for the betting round are completed...
+
+    return this.isWinner()
+  }
+
+  clearCommunityCards() {
+    this.communitycards = []
+  }
+
+  clearLastActions() {
+    for (var i = 0; i < this.seats.length; i++) {
+      if (this.seats[i]) {
+        this.seats[i].lastAction = null
+      }
+    }
+  }
+
+  clearBets() {
+    for (var i = 0; i < this.seats.length; i++) {
+      if (this.seats[i]) {
+        this.seats[i].bet = 0
+      }
+    }
   }
 
   bettingRound(round) {
+    console.log('betting round: ' + round);
+    this.stage = round;
+    if (this.isWinner() != -1) {
+      console.log('inside betting round: there is a winner!');
+      return;
+      }
+    else if (this.isWinner() == NaN) {
+      console.log('NaN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      return;
+    }
+    else {
+      switch (round) {
+        case 0:
+          //pre flop
+          var nextToAct = this.bigBlindPosition
+          for (var i = 0; i < this.maxSeats; i++) {
+            nextToAct = this.findNextPlayer(nextToAct)
+            this.playerToAct(nextToAct)
+            if (this.seats[this.lastPlayerToAct].lastAction == 'Fold' ) {
+              console.log('Round ended');
+              this.newRound()
+              break;
+            }
+          }
+
+          this.endBettingRound(0)
+          break;
+        case 1:
+          //...
+          this.dealFlop()
+          this.endBettingRound(1)
+          break;
+        case 2:
+          //..
+          this.dealTurn()
+          this.endBettingRound(2)
+          break;
+        case 3:
+          this.dealRiver()
+          this.endBettingRound(3)
+          break;
+        }
+    }
+  }
+
+  endBettingRound(round) {
     switch (round) {
       case 0:
-        //pre flop
-        var nextToAct = this.bigBlindPosition
-        for (var i = 0; i < this.maxSeats; i++) {
-          nextToAct = this.findNextPlayer(nextToAct)
-          this.playerToAct(nextToAct)
+        var player1 = this.seats[0]
+        var player2 = this.seats[1]
+        if (player1.lastAction == 'All In / Call' && player2.lastAction == 'All In / Call' && this.stage == 0) {
+          // deal cards till the end and figure out who is the winner
+          //
+          this.bettingRound(1)
         }
+        else if (player1.lastAction == 'Fold') {
+          console.log('Player 0 folded');
+          console.log('Player 1 earns pot: ' + this.pot);
+          player2.stack += this.pot
+        }
+        else if (player2.lastAction == 'Fold') {
+          console.log('Player 1 folded');
+          console.log('Player 0 earns pot: ' + this.pot);
+          player1.stack += this.pot
+        }
+
         break;
+      case 1:
+        //..
+        this.bettingRound(2)
+        break;
+      case 2:
+        //..
+        this.bettingRound(3)
+        break;
+      case 3:
+        // we are after the river, who is the winner ?
+        var player1 = this.seats[0]
+        var player2 = this.seats[1]
+        var result = getWinner([player1.hand, player2.hand], this.communitycards)
 
+        console.log('AND THE WINNER IS: ');
+        console.log(result);
 
+        if (Array.isArray(result)) {
+          // its a split:
+          player1.stack = this.pot/2
+          player2.stack = this.pot/2
+          console.log('its a split');
+          console.log(hasHand(player1.hand, this.communitycards));
+          console.log(hasHand(player2.hand, this.communitycards));
+          this.newRound()
+        }
+        else {
+          switch (result) {
+            case 0:
+              console.log('player 0 wins: ');
+              console.log(hasHand(player1.hand, this.communitycards));
+              console.log('player 1 loses: ');
+              console.log(hasHand(player2.hand, this.communitycards));
+              player1.stack += this.pot
+              player1.bet = 0
+              player2.bet = 0
+              break;
+            case 1:
+              console.log('player 1 wins: ');
+              console.log(hasHand(player2.hand, this.communitycards));
+              console.log('player 0 loses: ');
+              console.log(hasHand(player1.hand, this.communitycards));
+              player2.stack += this.pot
+              player1.bet = 0
+              player2.bet = 0
+              break;
+            default:
+          }
+          if (this.isWinner() == -1) {
+            console.log('we havent finished');
+            this.newRound();
+          }
+        }
+        return;
+        // break;
     }
   }
 
   playerToAct(player) {
     //takes the player position; provides player a game state from players perspective and player makes an action
     var state = this.getStateFromPlayerPerspective(player)
+    var playersCards = this.seats[player].hand;
     console.log('========================================================');
     console.log('PLAYER TO ACT: ', player);
     // AI goes here :) :)
     // var action = AI(state)
 
+
+    if (player == 0) {
+      var action = this.AI(state)
+      console.log('AI decides: ' + action);
+    }
+    else {
+      var action = this.HUMAN(state, playersCards)
+    }
+
+
+
+
     //for now we will manually decide on the action
     //instead of AI(state) we will use another interface HUMAN(state)
-    var action = this.HUMAN(state)
+    // var action = this.HUMAN(state, playersCards)
+
 
     this.performAction(player, action)
+    this.lastPlayerToAct = player
   }
 
-  HUMAN(state) {
+  AI(state) {
+    //random agent deciding between shove/fold
+    var options = ['All In / Call', 'Fold']
+    var decision = Math.floor(Math.random() * (2))
+    return options[decision]
+  }
+
+  HUMAN(state, playersCards) {
     // human cmd interface for playing the game
     console.log('STATE');
+    // console.log(JSON.stringify(state));
     console.log(state);
-    options = ['All In / Call', 'Fold']
+
+    console.log('Your cards: ' + playersCards);
+
+    var options = ['All In / Call', 'Fold']
     var index = readlineSync.keyInSelect(options, 'Your action?');
     return options[index]
   }
 
+
   performAction(player, action) {
-    console.log('player: ' + player + ' wants to perform action: ' + action);
+    if (action == 'All In / Call') {
+      console.log('player: ' + player + ' performs action: ' + action);
+      this.seats[player].lastAction = 'All In / Call'
+      // all in bet is of the size min(player stack, other player stack) - in case of 2 players
+      // TODO: actually its not that simple... there is also a small blind posted and big blind posted...
+      var opponent_total_stack = this.seats[this.findNextPlayer(player)].stack + this.seats[this.findNextPlayer(player)].bet
+      this.makeBet(Math.min(this.seats[player].stack, opponent_total_stack-this.seats[player].bet), player)
+
+    }
+    else if (action == 'Fold') {
+      this.seats[player].lastAction = 'Fold'
+      console.log('player: ' + player + ' performs action: ' + action);
+      console.log('player: ' + this.findNextPlayer(player) + ' wins the pot: ' + this.pot);
+      this.seats[this.findNextPlayer(player)].stack += this.pot
+    }
+
+
+
+
+
   }
 
   getStateFromPlayerPerspective(player) {
+    //aka observation...:)
     //function return the Table object representing the state of the game based on the {player}(its a position of a player in table.seats array) perspective
     //e.g. that it shows all the fundamental info that the real player would know
     //removing the other players hands and deck among other things
@@ -169,12 +381,13 @@ class Table {
 
   makeBet(amount, playerPosition) {
     let player = this.seats[playerPosition]
-    // console.log(`${player.id} makes a bet: ${amount}`);
+    console.log(`${player.id} makes a bet: ${amount}`);
 
     // TODO:  we need to check here if its a valid bet/raise....!!!
     // TODO: if the amount is > than players stack => bet should be the stack amount and stack = 0;
-    player.bet = amount
+    player.bet += amount  //adding to the bet thats already there
     player.stack -= amount // we need to check here if its even possible...
+    this.pot += amount
   }
 
   findNextPlayer(position) {
@@ -230,11 +443,13 @@ class Table {
     //moves button to the next valid position - its important to call this at the beggining of new round
     //for newly initiated tables initial button position is random and could be on a position where there is no players
     //calling this function fixes - moves the button from random position to next valid. (so the action is still random)
-    if (this.seats[this.button]) {
-      //no need to move...
-    }
+    // if (this.seats[this.button]) {
+    //   //no need to move...
+    //   // this.moveButton()
+    // }
     //if we reach the end of array... check if 0 is valid place for button, otherwise set it to 0 and continue...
-    else if (this.button + 1 == this.maxSeats) {
+    console.log('moving button, currently at position: ' + this.button);
+    if (this.button + 1 >= this.maxSeats) {
       if (this.seats[0]) {
         this.button = 0;
       }
@@ -313,6 +528,7 @@ class Player {
     this.stack = stack
     this.hand = []
     this.bet = null
+    this.lastAction = null
   }
 
 }
@@ -1743,7 +1959,7 @@ function getWinner(holeCards, communitycards) {
          hands.push(equalCategoryHands[i][2]);
        }
 
-       console.log(hands);
+       // console.log(hands);
 
        //we sort and start comparing by 3 of a kind rank
        let handsSortedByThreeOfaKindRank = [];
@@ -1763,8 +1979,8 @@ function getWinner(holeCards, communitycards) {
            }
        })
 
-       console.log('handsSortedByThreeOfaKindRank');
-       console.log(handsSortedByThreeOfaKindRank);
+       // console.log('handsSortedByThreeOfaKindRank');
+       // console.log(handsSortedByThreeOfaKindRank);
        // [ [ [ '7s', '7d', '7h' ], [ 'Tc', 'Ts' ] ],
        // [ [ '7c', '7d', '7h' ], [ 'Th', 'Ts' ] ] ]
 
@@ -1780,8 +1996,8 @@ function getWinner(holeCards, communitycards) {
              handsSortedByThreeOfaKindRank_temp.push(handsSortedByThreeOfaKindRank[i])
            }
          }
-         console.log('handsSortedByThreeOfaKindRank_temp');
-         console.log(handsSortedByThreeOfaKindRank_temp);
+         // console.log('handsSortedByThreeOfaKindRank_temp');
+         // console.log(handsSortedByThreeOfaKindRank_temp);
 
          //now we compare by the the kicker
          if (handsSortedByThreeOfaKindRank_temp[0][1][0][0] != handsSortedByThreeOfaKindRank_temp[1][1][0][0]) {
@@ -1814,7 +2030,7 @@ function getWinner(holeCards, communitycards) {
           hands.push(equalCategoryHands[i][2]);
         }
 
-        console.log(hands);
+        // console.log(hands);
         // [ [ [ '7d', '7h', '7s', '7c' ], '9s' ],
         //   [ [ '7d', '7h', '7s', '7c' ], 'Th' ] ]
 
@@ -1835,8 +2051,8 @@ function getWinner(holeCards, communitycards) {
             }
         })
 
-        console.log('handsSortedByFourOfAKindRank');
-        console.log(handsSortedByFourOfAKindRank);
+        // console.log('handsSortedByFourOfAKindRank');
+        // console.log(handsSortedByFourOfAKindRank);
         // [ [ [ 'Jc', 'Js', 'Jd' ], '8c', '7s' ],
         //   [ [ '5c', '5h', '5d' ], 'Jd', '8c' ] ]
 
